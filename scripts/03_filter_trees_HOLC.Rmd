@@ -116,16 +116,38 @@ holc %>%
 ```
 
 
-# 2 bring in trees
+# 2 get species of trees to focus on
 ```{r}
 
-tic();trees<-
-  st_read("G:/Shared drives/Grand Challenges/data/bc_forestry_trees_12232020/bc_forestry_trees_12232020.shp");toc() #takes 3 mins to run
+species_to_include <- 
+  googlesheets4::read_sheet('https://docs.google.com/spreadsheets/d/18K_M4e84m2yl0LYTxfubLhMRby1d5Uoosd1fJShEsH8/edit#gid=1234522482'
+                            , sheet = 'Narrowed list')
 
-trees %>% 
-  select() # drop columns to speed up, drop obs that are irrelevant
+```
 
 
+
+# 3 bring in trees
+```{r}
+
+tic(); trees <-
+  st_read("G:/Shared drives/Grand Challenges/data/bc_forestry_trees_12232020/bc_forestry_trees_12232020.shp") |> 
+  # st_read("/Users/dlocke/evo/AFRI_local/input_data/bc_forestry_trees_12232020/bc_forestry_trees_12232020.shp") |> # Dexter path
+  filter(SPP %in% species_to_include$SPP) |> 
+  # select() # FIXME drop superfluous columns?
+  # TODO filter by stem size
+  st_transform(st_crs(holc)) |> 
+  st_join(holc |> select(area_id, grade_group), left = TRUE) |> 
+  mutate(grade_group = ifelse(is.na(grade_group), 'not classified by HOLC', grade_group)); toc() #takes 3 mins to run
+
+# did that work?
+trees |> st_drop_geometry() |> tabyl(grade_group)
+trees |> glimpse()
+trees |> 
+  sample_n(1000) |> 
+  mapview(zcol = 'grade_group')
+  
+  
 
 ```
 
