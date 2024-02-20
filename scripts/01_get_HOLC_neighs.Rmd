@@ -1,0 +1,173 @@
+---
+title: "01_get_HOLC_neighs"
+author: "Kelsey McGurrin Dexter H. Locke"
+date: "`r format(Sys.time())`"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+  
+## 0 set up: load libraries, custom functions, set defaults
+```{r}
+
+# load libraries
+# packages we'll be using
+packs <- c(
+  'tidyverse'         # a must have!
+  , 'tidylog'         # makes things very verbose for 2x checking 
+  , 'magrittr'        # all of the pipes
+  , 'janitor'         # cleans things up
+  , 'sf'              # spatial support
+  , 'tidycensus'      # Census access
+  , 'mapview'         # webmaps
+  , 'tictoc'          # times things
+  , 'beepr'           # makes noises
+  )         
+
+# check for all of the libraries
+if (length(setdiff(packs, rownames(installed.packages()))) > 0) {
+  install.packages(setdiff(packs, rownames(installed.packages())))  
+}
+
+# load them
+vapply(packs, library, character.only = TRUE, logical(1), logical.return = TRUE, quietly = TRUE)
+
+
+# setting for get_acs
+census_api_key('db9b3481879b9e79eb8c86608656c3c8a8640bbb', install = TRUE, overwrite = TRUE)
+readRenviron("~/.Renviron")
+options(tigris_use_cache = TRUE)
+
+# keep random things consistent
+# set.seed(19870630) # needed?
+
+
+# redlining colors
+holc_pal <- c('#92BC6B' # green
+              , '#92C7C9' # blue
+              , '#E7DC6B' # yellow
+              , '#E47D67' # red
+              #, '#A9A9A9'
+              ) # dark gray)
+
+holc_pal_f<- c('#92BC6B' # green
+              , '#92C7C9' # blue
+              , '#E7DC6B' # yellow
+              , '#E47D67' # red
+              , '#A9A9A9'
+              , '#000000')
+
+
+# set custom function for getting spatial data
+see_sf <- function(){
+# what's in memory that are sf - spatial features?
+keep(eapply(.GlobalEnv, class),      # gets the objects in the global environment
+     ~ any(str_detect(., "sf"))) %>% # selects elements with sf in them
+    names(.) %>% as.character(.)     # my simple features
+}
+
+see_sf() -> sf_in_memory
+
+# what are the spatial references of those SF classes?
+mget(sf_in_memory) %>% purrr::map(~st_crs(.x)$epsg) %>% unlist() #%>% View()
+
+
+# # get file size
+
+# custom function for "Not In"
+`%nin%` <- Negate(`%in%`)
+
+
+# fixes mapview
+mapviewOptions(fgb = FALSE)
+
+```
+
+
+## 1 land cover spatial reference system
+```{r}
+
+# how does this match up with the land cove data?
+lcc_path <- '/Users/dlocke/tree_temp_change/large_data/balt_24510_lc_change_2013_2018'
+
+
+(lcc <- raster::raster(paste0(lcc_path, '/balt_24510_landcoverchange_20132018.tif')))
+# 
+# (
+#   lcc_key <- 
+#    foreign::read.dbf('/Users/dlocke/Chess_Bay_LC/md_lc-change_2013-2018_2022-Edition/md_lc-change_2013-2018_2022-Edition.tif.vat.dbf') |> 
+#   tidylog::select(ID = Value, LCChange, ChangeType, Red : Alpha) |> 
+#   mutate(LCChange = str_replace_all(LCChange, 'Scrub\\\\Shrub', 'Scrub Shrub')) |> 
+#   separate(LCChange, into = c('y_2013', 'y_2018'), sep = ' to ', remove = FALSE) |> 
+#   mutate(  y_2018 = ifelse(is.na(y_2018), y_2013, y_2018) # stability
+#          , tcc_class =
+#              case_when(
+#                  # y_2013 == 'Tree Canopy' & y_2018 == 'Tree Canopy' ~ 'persistence'
+#                  # captures tree-over classes
+#                  str_like(y_2013, 'Tree Canopy%') & str_like(y_2018, 'Tree Canopy%') ~ 'persistence'
+#                , y_2013 == 'Tree Canopy' & y_2018 != 'Tree Canopy' ~ 'loss'
+#                , y_2013 != 'Tree Canopy' & y_2018 == 'Tree Canopy' ~ 'gain'
+#                , TRUE ~ 'not tree'
+#                )
+#   )
+#   )
+
+
+```
+
+
+## 2 get Baltimore City boundaries
+```{r}
+
+
+(baci <- 
+  tidycensus::get_acs(
+      geography = 'county'
+    , state = 'Maryland'
+    , county = 'Baltimore city'
+    , variables = c('pop' = 'B01001_001') 
+    , year = 2015
+    , geometry = TRUE
+    , output = 'wide'
+    , moe_level = 95
+    ) |> 
+   st_transform(st_crs(lcc))
+ )
+
+
+
+
+```
+
+
+## 3 bring HOLC polygons
+```{r}
+
+sf::sf_use_s2(FALSE) # supresses error about invalid loops in 1212, 2851
+# https://stackoverflow.com/questions/68478179/how-to-resolve-spherical-geometry-failures-when-joining-spatial-data
+
+tic(); (holc <- 
+          st_read("https://dsl.richmond.edu/panorama/redlining/static/mappinginequality.gpkg") |> 
+          filter(city == 'Baltimore') |> 
+          st_transform(st_crs(lcc)) |> 
+          st_intersection(baci)); toc() # < 3 seconds
+
+# double check
+holc |> mapview() + mapview(baci, alpha.regions = 0, lwd = 2)
+
+holc |> 
+  st_write(paste0('../grand_challenges_large/baci_holc_polygons_', Sys.Date(), '.gpkg'))
+
+```
+
+
+# end
+
+
+
