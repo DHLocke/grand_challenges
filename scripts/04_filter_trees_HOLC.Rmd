@@ -127,15 +127,15 @@ species_to_include <-
 
 
 
-# 3 bring in trees
+# 3 bring in trees and match to HOLC polygons
 ```{r}
 
 tic(); trees <-
   st_read("G:/Shared drives/Grand Challenges/data/bc_forestry_trees_12232020/bc_forestry_trees_12232020.shp") |> 
   # st_read("/Users/dlocke/evo/AFRI_local/input_data/bc_forestry_trees_12232020/bc_forestry_trees_12232020.shp") |> # Dexter path
-  filter(SPP %in% species_to_include$SPP &
-           DBH < 5 &
-           CONDITION %nin% c("Dead","Absent","Stump","Sprouts","NA","N/A","Stump w") 
+  filter(SPP %in% species_to_include$SPP & # species of interest to Karin
+           DBH < 5 & # trees that were small in 2018
+           CONDITION %nin% c("Dead","Absent","Stump","Sprouts","NA","N/A","Stump w") # only healthy-ish trees
          ) |> 
   st_transform(st_crs(holc)) |> 
   st_join(holc |> select(area_id, grade_group), left = TRUE) |> 
@@ -143,16 +143,44 @@ tic(); trees <-
   filter(grade_group %in% c("AB","C","D")); toc() #takes 1 min to run
 
 # did that work?
-trees |> st_drop_geometry() |> tabyl(grade_group)
+trees |> st_drop_geometry() |> tabyl(SPP,grade_group)
 trees |> glimpse()
 trees |> 
   sample_n(1000) |> 
   mapview(zcol = 'grade_group')
   
-  
+trees |> 
+  filter(SPP == "Ulmus americana") |> 
+  mapview(zcol = 'grade_group')
 
 ```
 
+
+
+# 4 add in neighborhood heat data
+```{r}
+heat_summary <- read_csv('output_tables/heat_summary_2024-02-27.csv') |> 
+    rename(area_id = polygon_id)
+
+trees<- trees |> 
+  left_join(heat_summary, by = 'area_id')
+
+# did that work?
+trees |> st_drop_geometry() |> tabyl(mean_temp_C,grade_group)
+
+trees |> 
+  sample_n(1000) |> 
+  mapview(zcol = 'mean_temp_C')+mapview(filter(holc,grade_group != "industrial"),zcol="grade_group")
+```
+
+
+# 5 export 
+```{r}
+
+trees |> 
+  write_csv(paste0('output_tables/all_potential_trees_', Sys.Date(), '.csv'))
+
+```
 
 
 # end
