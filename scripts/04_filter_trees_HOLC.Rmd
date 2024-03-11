@@ -133,12 +133,14 @@ species_to_include <-
 tic(); trees <-
   st_read("G:/Shared drives/Grand Challenges/data/bc_forestry_trees_12232020/bc_forestry_trees_12232020.shp") |> 
   # st_read("/Users/dlocke/evo/AFRI_local/input_data/bc_forestry_trees_12232020/bc_forestry_trees_12232020.shp") |> # Dexter path
-  filter(SPP %in% species_to_include$SPP) |> 
-  # select() # FIXME drop superfluous columns?
-  # TODO filter by stem size
+  filter(SPP %in% species_to_include$SPP &
+           DBH < 5 &
+           CONDITION %nin% c("Dead","Absent","Stump","Sprouts","NA","N/A","Stump w") 
+         ) |> 
   st_transform(st_crs(holc)) |> 
   st_join(holc |> select(area_id, grade_group), left = TRUE) |> 
-  mutate(grade_group = ifelse(is.na(grade_group), 'not classified by HOLC', grade_group)); toc() #takes 3 mins to run
+  mutate(grade_group = ifelse(is.na(grade_group), 'not classified by HOLC', grade_group)) |>
+  filter(grade_group %in% c("AB","C","D")); toc() #takes 1 min to run
 
 # did that work?
 trees |> st_drop_geometry() |> tabyl(grade_group)
