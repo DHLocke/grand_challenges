@@ -1,5 +1,5 @@
 ---
-title: "03_filter_trees_HOLC"
+title: "04_filter_trees_HOLC"
 author: "Kelsey McGurrin Dexter H. Locke"
 date: "`r format(Sys.time())`"
 output: html_document
@@ -177,6 +177,9 @@ trees |>
 # 5 export 
 ```{r}
 
+#TO DO FIX ME
+# what is the best way to share/export this info? probably want one map per tree species for tree selection
+# once trees are selected, one map with everything?
 trees |> 
   write_csv(paste0('output_tables/all_potential_trees_', Sys.Date(), '.csv'))
 
