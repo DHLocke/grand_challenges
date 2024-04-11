@@ -140,10 +140,11 @@ tic(); trees <-
   st_transform(st_crs(holc)) |> 
   st_join(holc |> select(area_id, grade_group), left = TRUE) |> 
   mutate(grade_group = ifelse(is.na(grade_group), 'not classified by HOLC', grade_group)) |>
-  filter(grade_group %in% c("AB","C","D")); toc() #takes 1 min to run
+  filter(grade_group %in% c("AB","C","D")) |> 
+  rowid_to_column(var = 'Burghardt_ID'); toc() #takes 1 min to run
 
 # did that work?
-trees |> st_drop_geometry() |> tabyl(SPP,grade_group)
+trees |> st_drop_geometry() |> tabyl(SPP, grade_group)
 trees |> glimpse()
 trees |> 
   sample_n(1000) |> 
@@ -159,18 +160,23 @@ trees |>
 
 # 4 add in neighborhood heat data
 ```{r}
-heat_summary <- read_csv('output_tables/heat_summary_2024-02-27.csv') |> 
-    rename(area_id = polygon_id)
 
-trees<- trees |> 
+heat_summary <- 
+  read_csv('output_tables/heat_summary_2024-02-27.csv') |> 
+  rename(area_id = polygon_id)
+
+trees <- 
+  trees |> 
   left_join(heat_summary, by = 'area_id')
 
 # did that work?
-trees |> st_drop_geometry() |> tabyl(mean_temp_C,grade_group)
+trees |> st_drop_geometry() |> tabyl(mean_temp_C, grade_group)
 
 trees |> 
   sample_n(1000) |> 
-  mapview(zcol = 'mean_temp_C')+mapview(filter(holc,grade_group != "industrial"),zcol="grade_group")
+  mapview(zcol = 'mean_temp_C') + 
+  mapview(filter(holc, grade_group != "industrial"), zcol = "grade_group")
+
 ```
 
 
@@ -181,7 +187,20 @@ trees |>
 # what is the best way to share/export this info? probably want one map per tree species for tree selection
 # once trees are selected, one map with everything?
 trees |> 
-  write_csv(paste0('output_tables/all_potential_trees_', Sys.Date(), '.csv'))
+  mutate(street_address = paste0(Address, ' ', Street, ', Baltimore, MD')) |> 
+  select(  Burghardt_ID
+         , street_address
+         , Side # helpful?
+         , space_type = SPACE_TYPE
+         , SPP
+         , common = COMMON
+         , DBH_2018 = DBH
+         , Condition = CONDITION
+         , grade_group
+         , mean_temp_C
+         ) |>
+  st_write(paste0('../grand_challenges_large/candidate_street_trees_', Sys.Date(), '.gpkg'))
+  # write_csv(paste0('output_tables/all_potential_trees_', Sys.Date(), '.csv'))
 
 ```
 

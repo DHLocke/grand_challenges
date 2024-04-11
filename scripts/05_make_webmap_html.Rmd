@@ -1,0 +1,156 @@
+---
+#title: "05_make_webmap_html"
+author: "Kelsey McGurrin Dexter H. Locke"
+date: "`r format(Sys.time())`"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+  
+
+```{r include=FALSE}
+## 0 set up: load libraries, custom functions, set defaults
+
+# load libraries
+# packages we'll be using
+packs <- c(
+  'tidyverse'         # a must have!
+  # , 'tidylog'         # makes things very verbose for 2x checking 
+  # , 'magrittr'        # all of the pipes
+  # , 'janitor'         # cleans things up
+  , 'sf'              # spatial support
+  #, 'tidycensus'      # Census access
+  , 'mapview'         # webmaps
+  # , 'tictoc'          # times things
+  # , 'beepr'           # makes noises
+  )         
+
+# check for all of the libraries
+if (length(setdiff(packs, rownames(installed.packages()))) > 0) {
+  install.packages(setdiff(packs, rownames(installed.packages())))  
+}
+
+# load them
+vapply(packs, library, character.only = TRUE, logical(1), logical.return = TRUE, quietly = TRUE)
+
+
+
+# keep random things consistent
+# set.seed(19870630) # needed?
+
+
+# # redlining colors
+# holc_pal <- c('#92BC6B' # green
+#               , '#92C7C9' # blue
+#               , '#E7DC6B' # yellow
+#               , '#E47D67' # red
+#               #, '#A9A9A9'
+#               ) # dark gray)
+
+# redlining colors
+holc_pal_group <- c('#92BC6B' # green
+                    # , '#92C7C9' # blue
+                    , '#E7DC6B' # yellow
+                    , '#E47D67' # red
+                    # , '#A9A9A9' # dark gray)
+                    )
+
+# holc_pal_f<- c('#92BC6B' # green
+#               , '#92C7C9' # blue
+#               , '#E7DC6B' # yellow
+#               , '#E47D67' # red
+#               , '#A9A9A9'
+#               , '#000000')
+
+
+# custom function for "Not In"
+`%nin%` <- Negate(`%in%`)
+
+
+# fixes mapview
+mapviewOptions(fgb = FALSE)
+
+```
+
+
+```{r include=FALSE}
+## 1 read in HOLC polygons
+
+#define new groups for HOLC
+(holc_lu <- 
+  tribble(
+    ~grade, ~grade_group,
+    "A",    "AB",
+    "B",    "AB",
+    "C",    "C",
+    "D",    "D",
+    NA,     "industrial"
+  ))
+
+
+#read in shapefile, add new column
+(holc <- st_read('output_tables/baci_holc_polygons_2024-02-20.gpkg', as_tibble = TRUE) %>% 
+    left_join(holc_lu,by="grade"))
+
+```
+
+
+
+```{r include=FALSE}
+## 2 read in tree data
+
+trees <-  
+  st_read('../grand_challenges_large/candidate_street_trees_2024-04-11.gpkg')
+  
+
+```
+
+# Elms!
+```{r echo=FALSE}
+## 2 make map
+
+trees |>
+  # sample_n(1000) |> # for speed
+  filter(SPP == "Ulmus americana") |> 
+  mapview(  zcol = 'mean_temp_C'
+          # , col.regions = holc_pal_group
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview(  filter(holc, grade_group != "industrial")
+          , zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+
+# American Sycamore! (Platanus occidentalis)
+```{r echo=FALSE}
+## 2 make map
+
+trees |>
+  # sample_n(1000) |> # for speed
+  filter(SPP == "Platanus occidentalis") |> # American Sycamore
+  mapview(  zcol = 'mean_temp_C'
+          # , col.regions = holc_pal_group
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview(  filter(holc, grade_group != "industrial")
+          , zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
