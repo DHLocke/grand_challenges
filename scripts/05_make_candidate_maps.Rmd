@@ -1,0 +1,533 @@
+---
+title: "05_make_candidate_maps"
+author: "Kelsey McGurrin Dexter H. Locke"
+date: "`r format(Sys.time())`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+  
+
+```{r include=FALSE}
+## 0 set up: load libraries, custom functions, set defaults
+
+# load libraries
+# packages we'll be using
+packs <- c(
+  'tidyverse'         # a must have!
+  # , 'tidylog'         # makes things very verbose for 2x checking 
+  # , 'magrittr'        # all of the pipes
+  # , 'janitor'         # cleans things up
+  , 'sf'              # spatial support
+  #, 'tidycensus'      # Census access
+  , 'mapview'         # webmaps
+  # , 'tictoc'          # times things
+  # , 'beepr'           # makes noises
+  )         
+
+# check for all of the libraries
+if (length(setdiff(packs, rownames(installed.packages()))) > 0) {
+  install.packages(setdiff(packs, rownames(installed.packages())))  
+}
+
+# load them
+vapply(packs, library, character.only = TRUE, logical(1), logical.return = TRUE, quietly = TRUE)
+
+
+
+# keep random things consistent
+# set.seed(19870630) # needed?
+
+
+# # redlining colors
+# holc_pal <- c('#92BC6B' # green
+#               , '#92C7C9' # blue
+#               , '#E7DC6B' # yellow
+#               , '#E47D67' # red
+#               #, '#A9A9A9'
+#               ) # dark gray)
+
+# redlining colors
+holc_pal_group <- c('#92BC6B' # green
+                    # , '#92C7C9' # blue
+                    , '#E7DC6B' # yellow
+                    , '#E47D67' # red
+                    # , '#A9A9A9' # dark gray)
+                    )
+
+# holc_pal_f<- c('#92BC6B' # green
+#               , '#92C7C9' # blue
+#               , '#E7DC6B' # yellow
+#               , '#E47D67' # red
+#               , '#A9A9A9'
+#               , '#000000')
+
+
+# custom function for "Not In"
+`%nin%` <- Negate(`%in%`)
+
+
+# fixes mapview
+mapviewOptions(fgb = FALSE)
+
+```
+
+
+```{r include=FALSE}
+## 1 read in HOLC polygons
+
+#define new groups for HOLC
+(holc_lu <- 
+  tribble(
+    ~grade, ~grade_group,
+    "A",    "AB",
+    "B",    "AB",
+    "C",    "C",
+    "D",    "D",
+    NA,     "industrial"
+  ))
+
+
+#read in shapefile, add new column, drop industrial category
+(holc <- st_read('output_tables/baci_holc_polygons_2024-02-20.gpkg', as_tibble = TRUE) %>% 
+    left_join(holc_lu,by="grade") %>%
+    filter(grade_group %nin% "industrial") %>%
+    select(area_id,geom,grade_group))
+
+```
+
+
+
+```{r include=FALSE}
+## 2 read in tree data
+
+trees <-  
+  st_read('../grand_challenges_large/candidate_street_trees_2024-04-11.gpkg')
+  
+
+```
+
+
+# Acer buergerianum ()
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Acer buergerianum") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Acer platanoides ()
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Acer platanoides") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Acer rubrum (Red maple)
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Acer rubrum") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Acer saccharum ()
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Acer saccharum") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Aesculus glabra ()
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Aesculus glabra") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Amelanchier spp. ()
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Amelanchier spp.") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Betula nigra ()
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Betula nigra") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Carpinus caroliniana ()
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Carpinus caroliniana") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Celtis laevigata ()
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Celtis laevigata") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Celtis occidentalis ()
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Celtis occidentalis") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Cercis canadensis ()
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Cercis canadensis") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Cladrastis kentukea ()
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Cladrastis kentukea") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Cornus florida ()
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Cornus florida") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Cornus kousa ()
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Cornus kousa") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Ginkgo biloba ()
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Ginkgo biloba") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Gleditsia triacanthos (Honeylocust)
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Gleditsia triacanthos") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Ilex opaca ()
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Ilex opaca") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Juniperus virginiana ()
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Juniperus virginiana") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Lagerstroemia indica ()
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Lagerstroemia indica") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Liquidambar styraciflua ()
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Liquidambar styraciflua") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Liriodendron tulipifera ()
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Liriodendron tulipifera") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Pinus virginiana (Virginia pine)
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Pinus virginiana") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Platanus x acerifolia (London planetree)
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Platanus x acerifolia") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+

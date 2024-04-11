@@ -183,9 +183,6 @@ trees |>
 # 5 export 
 ```{r}
 
-#TO DO FIX ME
-# what is the best way to share/export this info? probably want one map per tree species for tree selection
-# once trees are selected, one map with everything?
 trees |> 
   mutate(street_address = paste0(Address, ' ', Street, ', Baltimore, MD')) |> 
   select(  Burghardt_ID
@@ -200,7 +197,7 @@ trees |>
          , mean_temp_C
          ) |>
   st_write(paste0('../grand_challenges_large/candidate_street_trees_', Sys.Date(), '.gpkg'))
-  # write_csv(paste0('output_tables/all_potential_trees_', Sys.Date(), '.csv'))
+ 
 
 ```
 
