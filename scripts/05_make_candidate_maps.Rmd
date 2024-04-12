@@ -117,7 +117,8 @@ trees <-
 ```
 
 
-# Acer buergerianum ()
+# Acer buergerianum (Trident maple)
+n = 256
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -135,7 +136,8 @@ trees |>
 
 ```
 
-# Acer platanoides ()
+# Acer platanoides (Norway maple)
+n = 166
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -154,6 +156,7 @@ trees |>
 ```
 
 # Acer rubrum (Red maple)
+n = 2822
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -171,7 +174,27 @@ trees |>
 
 ```
 
-# Acer saccharum ()
+# Acer saccharinum (Silver maple)
+n = 145
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Acer saccharinum") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Acer saccharum (Sugar maple)
+n = 634
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -189,7 +212,8 @@ trees |>
 
 ```
 
-# Aesculus glabra ()
+# Aesculus glabra (Ohio buckeye)
+n = 54
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -207,7 +231,8 @@ trees |>
 
 ```
 
-# Amelanchier spp. ()
+# Amelanchier spp. (Serviceberry spp.)
+n = 469
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -225,7 +250,8 @@ trees |>
 
 ```
 
-# Betula nigra ()
+# Betula nigra (River birch)
+n = 63
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -243,7 +269,8 @@ trees |>
 
 ```
 
-# Carpinus caroliniana ()
+# Carpinus caroliniana (American hornbeam)
+n = 174
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -261,7 +288,8 @@ trees |>
 
 ```
 
-# Celtis laevigata ()
+# Celtis laevigata (Sugarberry)
+n = 43
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -279,7 +307,8 @@ trees |>
 
 ```
 
-# Celtis occidentalis ()
+# Celtis occidentalis (Hackberry)
+n = 455
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -297,7 +326,8 @@ trees |>
 
 ```
 
-# Cercis canadensis ()
+# Cercis canadensis (Eastern redbud)
+n = 1120
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -315,7 +345,8 @@ trees |>
 
 ```
 
-# Cladrastis kentukea ()
+# Cladrastis kentukea (Yellowwood)
+n = 168
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -333,7 +364,8 @@ trees |>
 
 ```
 
-# Cornus florida ()
+# Cornus florida (Flowering dogwood)
+n = 347
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -351,7 +383,8 @@ trees |>
 
 ```
 
-# Cornus kousa ()
+# Cornus kousa (Kousa dogwood)
+n = 84
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -369,7 +402,8 @@ trees |>
 
 ```
 
-# Ginkgo biloba ()
+# Ginkgo biloba (Ginkgo)
+n = 574
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -388,6 +422,7 @@ trees |>
 ```
 
 # Gleditsia triacanthos (Honeylocust)
+n = 14
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -405,7 +440,8 @@ trees |>
 
 ```
 
-# Ilex opaca ()
+# Ilex opaca (American holly)
+n = 109
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -423,7 +459,8 @@ trees |>
 
 ```
 
-# Juniperus virginiana ()
+# Juniperus virginiana (Eastern redcedar)
+n = 72
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -441,7 +478,8 @@ trees |>
 
 ```
 
-# Lagerstroemia indica ()
+# Lagerstroemia indica (Crapemyrtle)
+n = 768
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -459,7 +497,8 @@ trees |>
 
 ```
 
-# Liquidambar styraciflua ()
+# Liquidambar styraciflua (Sweetgum)
+n = 931
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -477,7 +516,8 @@ trees |>
 
 ```
 
-# Liriodendron tulipifera ()
+# Liriodendron tulipifera (Tuliptree)
+n = 129
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -495,7 +535,84 @@ trees |>
 
 ```
 
+#  Magnolia grandiflora (Southern magnolia)
+n = 52
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Magnolia grandiflora") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+#  Magnolia virginiana (Sweetbay magnolia)
+n = 41
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Magnolia virginiana") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+#  Nyssa sylvatica (Blackgum)
+n = 676
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Nyssa sylvatica") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
 # Pinus virginiana (Virginia pine)
+n = 13
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Pinus virginiana") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Platanus occidentalis (Sycamore)
+n = 106
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -514,6 +631,7 @@ trees |>
 ```
 
 # Platanus x acerifolia (London planetree)
+n = 1229
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -531,3 +649,344 @@ trees |>
 
 ```
 
+# Prunus cerasifera (Cherry plum)
+n = 105
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Prunus cerasifera") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Quercus alba (White oak)
+n = 144
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Quercus alba") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Quercus bicolor (Swamp white oak)
+n = 667
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Quercus bicolor") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Quercus falcata (Southern red oak)
+n = 53
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Quercus falcata") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Quercus lyrata (Overcup oak)
+n = 62
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Quercus lyrata") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Quercus macrocarpa (Bur oak)
+n = 50
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Quercus macrocarpa") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Quercus michauxii (Swamp chesnut oak)
+n = 44
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Quercus michauxii") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Quercus palustris (Pin oak)
+n = 364
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Quercus palustris") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Quercus phellos (Willow oak)
+n = 1061
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Quercus phellos") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Quercus rubra (Northern red oak)
+n = 495
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Quercus rubra") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Robinia pseudoacacia (Black locust)
+n = 48
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Robinia pseudoacacia") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Syringa reticulata (Japanese tree lilac)
+n = 224
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Syringa reticulata") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Taxodium distichum (Baldcypress)
+n = 174
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Taxodium distichum") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Thuja occidentalis (Eastern arborvitae)
+n = 162
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Thuja occidentalis") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Tilia americana (American linden)
+n = 288
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Tilia americana") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Tilia tomentosa (Silver linden)
+n = 150
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Tilia tomentosa") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Ulmus americana (American elm)
+n = 408
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Ulmus americana") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+# Zelkova serrata (Japanese zelkova)
+n = 1356
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Zelkova serrata") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
