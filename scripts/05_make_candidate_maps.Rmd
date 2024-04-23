@@ -117,6 +117,27 @@ trees <-
 ```
 
 
+# Summary Table
+```{r include=FALSE}
+
+# add holc area IDs into tree sheet
+all<-st_join(holc, trees, join = st_intersects) %>%
+  select(-grade_group.x) %>%
+  rename(grade_group=grade_group.y) %>%
+# make table with spp as rows, number of neighborhoods and trees as columns
+  st_drop_geometry() %>%
+  group_by(SPP,grade_group) %>%
+  summarize(n_trees=n(),n_neighborhoods=length(unique(area_id))) %>%
+  drop_na() %>%
+  pivot_wider(id_cols=SPP,names_from = grade_group,values_from = c(n_trees,n_neighborhoods)) 
+
+```
+```{r echo=FALSE}
+DT::datatable(all)
+```
+
+
+
 # Acer buergerianum (Trident maple)
 n = 256
 ```{r echo=FALSE}
