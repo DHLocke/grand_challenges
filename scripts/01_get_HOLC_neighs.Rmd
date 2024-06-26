@@ -93,7 +93,7 @@ mapviewOptions(fgb = FALSE)
 ## 1 land cover spatial reference system
 ```{r}
 
-# how does this match up with the land cove data?
+# how does this match up with the land cover data?
 lcc_path <- '/Users/dlocke/tree_temp_change/large_data/balt_24510_lc_change_2013_2018'
 
 

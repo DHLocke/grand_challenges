@@ -121,27 +121,33 @@ holc %>%
 
 species_to_include <- 
   googlesheets4::read_sheet('https://docs.google.com/spreadsheets/d/18K_M4e84m2yl0LYTxfubLhMRby1d5Uoosd1fJShEsH8/edit#gid=1234522482'
-                            , sheet = 'Narrowed list')
+                            , sheet = 'Narrowed list') %>%
+# also add in species which will be used for mcintire-stennis project (regardless of HOLC neighborhoods)
+  add_row(SPP=c("Carya illinoinensis","Pinus strobus", "Prunus serotina","Salix nigra"))
 
 ```
-
 
 
 # 3 bring in trees and match to HOLC polygons
 ```{r}
 
 tic(); trees <-
-  st_read("G:/Shared drives/Grand Challenges/data/bc_forestry_trees_12232020/bc_forestry_trees_12232020.shp") |> 
-  # st_read("/Users/dlocke/evo/AFRI_local/input_data/bc_forestry_trees_12232020/bc_forestry_trees_12232020.shp") |> # Dexter path
+  st_read("G:/Shared drives/Grand Challenges/data/bc_forestry_trees_12232020/bc_forestry_trees_12232020.shp") 
+  # st_read("/Users/dlocke/evo/AFRI_local/input_data/bc_forestry_trees_12232020/bc_forestry_trees_12232020.shp") # Dexter path
+
+# fix naming so varieties included with species
+trees$SPP[trees$SPP=='Populus nigra \'Italica\'']<-'Populus nigra'
+trees$SPP[trees$SPP=='Gleditsia triacanthos inermis']<-'Gleditsia triacanthos'
+                                                         
+trees <- trees |>
+  rowid_to_column(var = 'Burghardt_ID') |>
   filter(SPP %in% species_to_include$SPP & # species of interest to Karin
            DBH < 5 & # trees that were small in 2018
            CONDITION %nin% c("Dead","Absent","Stump","Sprouts","NA","N/A","Stump w") # only healthy-ish trees
          ) |> 
   st_transform(st_crs(holc)) |> 
-  st_join(holc |> select(area_id, grade_group), left = TRUE) |> 
-  mutate(grade_group = ifelse(is.na(grade_group), 'not classified by HOLC', grade_group)) |>
-  filter(grade_group %in% c("AB","C","D")) |> 
-  rowid_to_column(var = 'Burghardt_ID'); toc() #takes 1 min to run
+  st_join(holc |> select(area_id, grade, grade_group), left = TRUE) |> 
+  mutate(grade_group = ifelse(is.na(grade_group), 'undesignated', grade_group)); toc() #takes 1 min to run
 
 # did that work?
 trees |> st_drop_geometry() |> tabyl(SPP, grade_group)
@@ -149,9 +155,14 @@ trees |> glimpse()
 trees |> 
   sample_n(1000) |> 
   mapview(zcol = 'grade_group')
+
+trees |> 
+  sample_n(1000) |> 
+  mapview()+
+  mapview(holc,zcol="grade_group")
   
 trees |> 
-  filter(SPP == "Ulmus americana") |> 
+  filter(SPP == "Carya illinoinensis") |> 
   mapview(zcol = 'grade_group')
 
 ```
@@ -174,8 +185,7 @@ trees |> st_drop_geometry() |> tabyl(mean_temp_C, grade_group)
 
 trees |> 
   sample_n(1000) |> 
-  mapview(zcol = 'mean_temp_C') + 
-  mapview(filter(holc, grade_group != "industrial"), zcol = "grade_group")
+  mapview(zcol = 'mean_temp_C')
 
 ```
 
@@ -183,6 +193,7 @@ trees |>
 # 5 export 
 ```{r}
 
+# export as geopackage for making future maps
 trees |> 
   mutate(street_address = paste0(Address, ' ', Street, ', Baltimore, MD')) |> 
   select(  Burghardt_ID
@@ -191,13 +202,19 @@ trees |>
          , space_type = SPACE_TYPE
          , SPP
          , common = COMMON
+         , MULTI_STEM
          , DBH_2018 = DBH
+         , Ht_2018 = TREE_HT
+         , Notes_2018 = Notes
          , Condition = CONDITION
+         , area_id
+         , grade
          , grade_group
          , mean_temp_C
          ) |>
-  st_write(paste0('../grand_challenges_large/candidate_street_trees_', Sys.Date(), '.gpkg'))
- 
+  st_write(paste0('../grand_challenges_large/candidate_street_trees_', Sys.Date(), '.gpkg'),append = F) |>
+# also export as spreadsheet for easy filtering to select trees
+  st_write(paste0('../grand_challenges_large/candidate_street_trees_', Sys.Date(), '.csv'))
 
 ```
 

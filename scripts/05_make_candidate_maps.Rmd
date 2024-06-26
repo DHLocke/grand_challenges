@@ -1,5 +1,5 @@
 ---
-title: "05_make_candidate_maps"
+title: "GC Candidate Tree Maps"
 author: "Kelsey McGurrin Dexter H. Locke"
 date: "`r format(Sys.time())`"
 output:
@@ -61,7 +61,7 @@ holc_pal_group <- c('#92BC6B' # green
                     # , '#92C7C9' # blue
                     , '#E7DC6B' # yellow
                     , '#E47D67' # red
-                    # , '#A9A9A9' # dark gray)
+                    , '#A9A9A9' # dark gray)
                     )
 
 # holc_pal_f<- c('#92BC6B' # green
@@ -92,16 +92,15 @@ mapviewOptions(fgb = FALSE)
     "A",    "AB",
     "B",    "AB",
     "C",    "C",
-    "D",    "D",
-    NA,     "industrial"
+    "D",    "D"
+    ,    NA,     "industrial"
   ))
 
 
-#read in shapefile, add new column, drop industrial category
+#join with shapefile
 (holc <- st_read('output_tables/baci_holc_polygons_2024-02-20.gpkg', as_tibble = TRUE) %>% 
     left_join(holc_lu,by="grade") %>%
-    filter(grade_group %nin% "industrial") %>%
-    select(area_id,geom,grade_group))
+    select(area_id,geom,grade,grade_group))
 
 ```
 
@@ -111,8 +110,11 @@ mapviewOptions(fgb = FALSE)
 ## 2 read in tree data
 
 trees <-  
-  st_read('../grand_challenges_large/candidate_street_trees_2024-04-11.gpkg')
-  
+  st_read('../grand_challenges_large/candidate_street_trees_2024-06-26.gpkg') 
+
+
+trees$area_id<- replace_na(trees$area_id,0)
+trees$grade<- replace_na(trees$grade,"undesignated")
 
 ```
 
@@ -120,26 +122,26 @@ trees <-
 # Summary Table
 ```{r include=FALSE}
 
-# add holc area IDs into tree sheet
-all<-st_join(holc, trees, join = st_intersects) %>%
-  select(-grade_group.x) %>%
-  rename(grade_group=grade_group.y) %>%
 # make table with spp as rows, number of neighborhoods and trees as columns
+tab<-trees %>%
   st_drop_geometry() %>%
   group_by(SPP,grade_group) %>%
   summarize(n_trees=n(),n_neighborhoods=length(unique(area_id))) %>%
   drop_na() %>%
-  pivot_wider(id_cols=SPP,names_from = grade_group,values_from = c(n_trees,n_neighborhoods)) 
+  pivot_wider(id_cols=SPP,names_from = grade_group,values_from = c(n_trees,n_neighborhoods)) %>%
+  mutate(n_trees_other=sum(n_trees_industrial,n_trees_undesignated,na.rm = T),.keep="unused",.after=n_trees_D) %>%
+  select(-c(n_neighborhoods_industrial,n_neighborhoods_undesignated))
+
 
 ```
 ```{r echo=FALSE}
-DT::datatable(all)
+DT::datatable(tab)
 ```
 
 
 
 # Acer buergerianum (Trident maple)
-n = 256
+n = `r nrow(trees|>filter(SPP=="Acer buergerianum"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -158,7 +160,7 @@ trees |>
 ```
 
 # Acer platanoides (Norway maple)
-n = 166
+n = `r nrow(trees|>filter(SPP=="Acer platanoides"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -177,7 +179,7 @@ trees |>
 ```
 
 # Acer rubrum (Red maple)
-n = 2822
+n = `r nrow(trees|>filter(SPP=="Acer rubrum"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -196,7 +198,7 @@ trees |>
 ```
 
 # Acer saccharinum (Silver maple)
-n = 145
+n = `r nrow(trees|>filter(SPP=="Acer saccharinum"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -215,7 +217,7 @@ trees |>
 ```
 
 # Acer saccharum (Sugar maple)
-n = 634
+n = `r nrow(trees|>filter(SPP=="Acer saccharum"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -234,7 +236,7 @@ trees |>
 ```
 
 # Aesculus glabra (Ohio buckeye)
-n = 54
+n = `r nrow(trees|>filter(SPP=="Aesculus glabra"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -253,7 +255,7 @@ trees |>
 ```
 
 # Amelanchier spp. (Serviceberry spp.)
-n = 469
+n = `r nrow(trees|>filter(SPP=="Amelanchier spp."))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -272,7 +274,7 @@ trees |>
 ```
 
 # Betula nigra (River birch)
-n = 63
+n = `r nrow(trees|>filter(SPP=="Betula nigra"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -291,7 +293,7 @@ trees |>
 ```
 
 # Carpinus caroliniana (American hornbeam)
-n = 174
+n = `r nrow(trees|>filter(SPP=="Carpinus caroliniana"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -309,8 +311,27 @@ trees |>
 
 ```
 
+# Carya illinoinensis (Pecan)
+n = `r nrow(trees|>filter(SPP=="Carya illinoinensis"))`
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Carya illinoinensis") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
 # Celtis laevigata (Sugarberry)
-n = 43
+n = `r nrow(trees|>filter(SPP=="Celtis laevigata"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -329,7 +350,7 @@ trees |>
 ```
 
 # Celtis occidentalis (Hackberry)
-n = 455
+n = `r nrow(trees|>filter(SPP=="Celtis occidentalis"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -348,7 +369,7 @@ trees |>
 ```
 
 # Cercis canadensis (Eastern redbud)
-n = 1120
+n = `r nrow(trees|>filter(SPP=="Cercis canadensis"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -367,7 +388,7 @@ trees |>
 ```
 
 # Cladrastis kentukea (Yellowwood)
-n = 168
+n = `r nrow(trees|>filter(SPP=="Cladrastis kentukea"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -386,7 +407,7 @@ trees |>
 ```
 
 # Cornus florida (Flowering dogwood)
-n = 347
+n = `r nrow(trees|>filter(SPP=="Cornus florida"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -405,7 +426,7 @@ trees |>
 ```
 
 # Cornus kousa (Kousa dogwood)
-n = 84
+n = `r nrow(trees|>filter(SPP=="Cornus kousa"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -424,7 +445,7 @@ trees |>
 ```
 
 # Ginkgo biloba (Ginkgo)
-n = 574
+n = `r nrow(trees|>filter(SPP=="Ginkgo biloba"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -443,7 +464,7 @@ trees |>
 ```
 
 # Gleditsia triacanthos (Honeylocust)
-n = 14
+n = `r nrow(trees|>filter(SPP=="Gleditsia triacanthos"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -462,7 +483,7 @@ trees |>
 ```
 
 # Ilex opaca (American holly)
-n = 109
+n = `r nrow(trees|>filter(SPP=="Ilex opaca"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -481,7 +502,7 @@ trees |>
 ```
 
 # Juniperus virginiana (Eastern redcedar)
-n = 72
+n = `r nrow(trees|>filter(SPP=="Juniperus virginiana"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -500,7 +521,7 @@ trees |>
 ```
 
 # Lagerstroemia indica (Crapemyrtle)
-n = 768
+n = `r nrow(trees|>filter(SPP=="Lagerstroemia indica"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -519,7 +540,7 @@ trees |>
 ```
 
 # Liquidambar styraciflua (Sweetgum)
-n = 931
+n = `r nrow(trees|>filter(SPP=="Liquidambar styraciflua"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -538,7 +559,7 @@ trees |>
 ```
 
 # Liriodendron tulipifera (Tuliptree)
-n = 129
+n = `r nrow(trees|>filter(SPP=="Liriodendron tulipifera"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -557,7 +578,7 @@ trees |>
 ```
 
 #  Magnolia grandiflora (Southern magnolia)
-n = 52
+n = `r nrow(trees|>filter(SPP=="Magnolia grandiflora"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -576,7 +597,7 @@ trees |>
 ```
 
 #  Magnolia virginiana (Sweetbay magnolia)
-n = 41
+n = `r nrow(trees|>filter(SPP=="Magnolia virginiana"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -595,7 +616,7 @@ trees |>
 ```
 
 #  Nyssa sylvatica (Blackgum)
-n = 676
+n = `r nrow(trees|>filter(SPP=="Nyssa sylvatica"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -614,7 +635,7 @@ trees |>
 ```
 
 # Pinus virginiana (Virginia pine)
-n = 13
+n = `r nrow(trees|>filter(SPP=="Pinus virginiana"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -632,13 +653,33 @@ trees |>
 
 ```
 
-# Platanus occidentalis (Sycamore)
-n = 106
+# Pinus strobus (Eastern white pine)
+n = `r nrow(trees|>filter(SPP=="Pinus strobus"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
 trees |>
-  filter(SPP == "Pinus virginiana") |>
+  filter(SPP == "Pinus strobus") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
+
+# Platanus occidentalis (Sycamore)
+n = `r nrow(trees|>filter(SPP=="Platanus occidentalis"))`
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Platanus occidentalis") |>
   mapview(  zcol = 'mean_temp_C'
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
@@ -652,7 +693,7 @@ trees |>
 ```
 
 # Platanus x acerifolia (London planetree)
-n = 1229
+n = `r nrow(trees|>filter(SPP=="Platanus x acerifolia"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -671,7 +712,7 @@ trees |>
 ```
 
 # Prunus cerasifera (Cherry plum)
-n = 105
+n = `r nrow(trees|>filter(SPP=="Prunus cerasifera"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -689,8 +730,27 @@ trees |>
 
 ```
 
+# Prunus serotina (Black cherry)
+n = `r nrow(trees|>filter(SPP=="Prunus serotina"))`
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Prunus serotina") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
 # Quercus alba (White oak)
-n = 144
+n = `r nrow(trees|>filter(SPP=="Quercus alba"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -709,7 +769,7 @@ trees |>
 ```
 
 # Quercus bicolor (Swamp white oak)
-n = 667
+n = `r nrow(trees|>filter(SPP=="Quercus bicolor"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -728,7 +788,7 @@ trees |>
 ```
 
 # Quercus falcata (Southern red oak)
-n = 53
+n = `r nrow(trees|>filter(SPP=="Quercus falcata"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -747,7 +807,7 @@ trees |>
 ```
 
 # Quercus lyrata (Overcup oak)
-n = 62
+n = `r nrow(trees|>filter(SPP=="Quercus lyrata"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -766,7 +826,7 @@ trees |>
 ```
 
 # Quercus macrocarpa (Bur oak)
-n = 50
+n = `r nrow(trees|>filter(SPP=="Quercus macrocarpa"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -785,7 +845,7 @@ trees |>
 ```
 
 # Quercus michauxii (Swamp chesnut oak)
-n = 44
+n = `r nrow(trees|>filter(SPP=="Quercus michauxii"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -804,7 +864,7 @@ trees |>
 ```
 
 # Quercus palustris (Pin oak)
-n = 364
+n = `r nrow(trees|>filter(SPP=="Quercus palustris"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -823,7 +883,7 @@ trees |>
 ```
 
 # Quercus phellos (Willow oak)
-n = 1061
+n = `r nrow(trees|>filter(SPP=="Quercus phellos"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -842,7 +902,7 @@ trees |>
 ```
 
 # Quercus rubra (Northern red oak)
-n = 495
+n = `r nrow(trees|>filter(SPP=="Quercus rubra"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -861,7 +921,7 @@ trees |>
 ```
 
 # Robinia pseudoacacia (Black locust)
-n = 48
+n = `r nrow(trees|>filter(SPP=="Robinia pseudoacacia"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -879,8 +939,27 @@ trees |>
 
 ```
 
+# Salix nigra (Black willow)
+n = `r nrow(trees|>filter(SPP=="Salix nigra"))`
+```{r echo=FALSE}
+## 3 make maps
+
+trees |>
+  filter(SPP == "Salix nigra") |>
+  mapview(  zcol = 'mean_temp_C'
+          , layer.name = 'mean_temp_C'
+          , alpha.regions = .9
+          ) +
+  mapview( holc, zcol = "grade_group"
+          , col.regions = holc_pal_group
+          , layer.name = 'grade group'
+          , alpha.regions = .4
+          ) 
+
+```
+
 # Syringa reticulata (Japanese tree lilac)
-n = 224
+n = `r nrow(trees|>filter(SPP=="Syringa reticulata"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -899,7 +978,7 @@ trees |>
 ```
 
 # Taxodium distichum (Baldcypress)
-n = 174
+n = `r nrow(trees|>filter(SPP=="Taxodium distichum"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -918,7 +997,7 @@ trees |>
 ```
 
 # Thuja occidentalis (Eastern arborvitae)
-n = 162
+n = `r nrow(trees|>filter(SPP=="Thuja occidentalis"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -937,7 +1016,7 @@ trees |>
 ```
 
 # Tilia americana (American linden)
-n = 288
+n = `r nrow(trees|>filter(SPP=="Tilia americana"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -956,7 +1035,7 @@ trees |>
 ```
 
 # Tilia tomentosa (Silver linden)
-n = 150
+n = `r nrow(trees|>filter(SPP=="Tilia tomentosa"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -975,7 +1054,7 @@ trees |>
 ```
 
 # Ulmus americana (American elm)
-n = 408
+n = `r nrow(trees|>filter(SPP=="Ulmus americana"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
@@ -994,7 +1073,7 @@ trees |>
 ```
 
 # Zelkova serrata (Japanese zelkova)
-n = 1356
+n = `r nrow(trees|>filter(SPP=="Zelkova serrata"))`
 ```{r echo=FALSE}
 ## 3 make maps
 
