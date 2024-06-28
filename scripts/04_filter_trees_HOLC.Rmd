@@ -198,8 +198,9 @@ trees |>
   mutate(street_address = paste0(Address, ' ', Street, ', Baltimore, MD')) |> 
   select(  Burghardt_ID
          , street_address
-         , Side # helpful?
          , space_type = SPACE_TYPE
+         , SPACELENGTH= SPCELENGTH
+         , SPACEWIDTH
          , SPP
          , common = COMMON
          , MULTI_STEM

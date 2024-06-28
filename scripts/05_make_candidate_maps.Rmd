@@ -58,10 +58,10 @@ vapply(packs, library, character.only = TRUE, logical(1), logical.return = TRUE,
 
 # redlining colors
 holc_pal_group <- c('#92BC6B' # green
-                    # , '#92C7C9' # blue
+                    , '#92C7C9' # blue
                     , '#E7DC6B' # yellow
                     , '#E47D67' # red
-                    , '#A9A9A9' # dark gray)
+                    #, '#A9A9A9' # dark gray)
                     )
 
 # holc_pal_f<- c('#92BC6B' # green
@@ -110,7 +110,7 @@ mapviewOptions(fgb = FALSE)
 ## 2 read in tree data
 
 trees <-  
-  st_read('../grand_challenges_large/candidate_street_trees_2024-06-26.gpkg') 
+  st_read('../grand_challenges_large/candidate_street_trees_2024-06-28.gpkg') 
 
 
 trees$area_id<- replace_na(trees$area_id,0)
@@ -151,9 +151,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -161,7 +161,7 @@ trees |>
 
 # Acer platanoides (Norway maple)
 n = `r nrow(trees|>filter(SPP=="Acer platanoides"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -170,9 +170,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -180,7 +180,7 @@ trees |>
 
 # Acer rubrum (Red maple)
 n = `r nrow(trees|>filter(SPP=="Acer rubrum"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -189,9 +189,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -199,7 +199,7 @@ trees |>
 
 # Acer saccharinum (Silver maple)
 n = `r nrow(trees|>filter(SPP=="Acer saccharinum"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -208,9 +208,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -218,7 +218,7 @@ trees |>
 
 # Acer saccharum (Sugar maple)
 n = `r nrow(trees|>filter(SPP=="Acer saccharum"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -227,9 +227,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -237,7 +237,7 @@ trees |>
 
 # Aesculus glabra (Ohio buckeye)
 n = `r nrow(trees|>filter(SPP=="Aesculus glabra"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -246,9 +246,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -256,7 +256,7 @@ trees |>
 
 # Amelanchier spp. (Serviceberry spp.)
 n = `r nrow(trees|>filter(SPP=="Amelanchier spp."))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -265,9 +265,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -275,7 +275,7 @@ trees |>
 
 # Betula nigra (River birch)
 n = `r nrow(trees|>filter(SPP=="Betula nigra"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -284,9 +284,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -294,7 +294,7 @@ trees |>
 
 # Carpinus caroliniana (American hornbeam)
 n = `r nrow(trees|>filter(SPP=="Carpinus caroliniana"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -303,9 +303,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -313,7 +313,7 @@ trees |>
 
 # Carya illinoinensis (Pecan)
 n = `r nrow(trees|>filter(SPP=="Carya illinoinensis"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -322,9 +322,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -332,7 +332,7 @@ trees |>
 
 # Celtis laevigata (Sugarberry)
 n = `r nrow(trees|>filter(SPP=="Celtis laevigata"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -341,9 +341,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -351,7 +351,7 @@ trees |>
 
 # Celtis occidentalis (Hackberry)
 n = `r nrow(trees|>filter(SPP=="Celtis occidentalis"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -360,9 +360,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -370,7 +370,7 @@ trees |>
 
 # Cercis canadensis (Eastern redbud)
 n = `r nrow(trees|>filter(SPP=="Cercis canadensis"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -379,9 +379,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -389,7 +389,7 @@ trees |>
 
 # Cladrastis kentukea (Yellowwood)
 n = `r nrow(trees|>filter(SPP=="Cladrastis kentukea"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -398,9 +398,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -408,7 +408,7 @@ trees |>
 
 # Cornus florida (Flowering dogwood)
 n = `r nrow(trees|>filter(SPP=="Cornus florida"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -417,9 +417,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -427,7 +427,7 @@ trees |>
 
 # Cornus kousa (Kousa dogwood)
 n = `r nrow(trees|>filter(SPP=="Cornus kousa"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -436,9 +436,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -446,7 +446,7 @@ trees |>
 
 # Ginkgo biloba (Ginkgo)
 n = `r nrow(trees|>filter(SPP=="Ginkgo biloba"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -455,9 +455,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -465,7 +465,7 @@ trees |>
 
 # Gleditsia triacanthos (Honeylocust)
 n = `r nrow(trees|>filter(SPP=="Gleditsia triacanthos"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -474,9 +474,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -484,7 +484,7 @@ trees |>
 
 # Ilex opaca (American holly)
 n = `r nrow(trees|>filter(SPP=="Ilex opaca"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -493,9 +493,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -503,7 +503,7 @@ trees |>
 
 # Juniperus virginiana (Eastern redcedar)
 n = `r nrow(trees|>filter(SPP=="Juniperus virginiana"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -512,9 +512,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -522,7 +522,7 @@ trees |>
 
 # Lagerstroemia indica (Crapemyrtle)
 n = `r nrow(trees|>filter(SPP=="Lagerstroemia indica"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -531,9 +531,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -541,7 +541,7 @@ trees |>
 
 # Liquidambar styraciflua (Sweetgum)
 n = `r nrow(trees|>filter(SPP=="Liquidambar styraciflua"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -550,9 +550,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -560,7 +560,7 @@ trees |>
 
 # Liriodendron tulipifera (Tuliptree)
 n = `r nrow(trees|>filter(SPP=="Liriodendron tulipifera"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -569,9 +569,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -579,7 +579,7 @@ trees |>
 
 #  Magnolia grandiflora (Southern magnolia)
 n = `r nrow(trees|>filter(SPP=="Magnolia grandiflora"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -588,9 +588,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -598,7 +598,7 @@ trees |>
 
 #  Magnolia virginiana (Sweetbay magnolia)
 n = `r nrow(trees|>filter(SPP=="Magnolia virginiana"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -607,9 +607,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -617,7 +617,7 @@ trees |>
 
 #  Nyssa sylvatica (Blackgum)
 n = `r nrow(trees|>filter(SPP=="Nyssa sylvatica"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -626,9 +626,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -636,7 +636,7 @@ trees |>
 
 # Pinus virginiana (Virginia pine)
 n = `r nrow(trees|>filter(SPP=="Pinus virginiana"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -645,9 +645,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -655,7 +655,7 @@ trees |>
 
 # Pinus strobus (Eastern white pine)
 n = `r nrow(trees|>filter(SPP=="Pinus strobus"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -664,9 +664,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -675,7 +675,7 @@ trees |>
 
 # Platanus occidentalis (Sycamore)
 n = `r nrow(trees|>filter(SPP=="Platanus occidentalis"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -684,9 +684,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -694,7 +694,7 @@ trees |>
 
 # Platanus x acerifolia (London planetree)
 n = `r nrow(trees|>filter(SPP=="Platanus x acerifolia"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -703,9 +703,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -713,7 +713,7 @@ trees |>
 
 # Prunus cerasifera (Cherry plum)
 n = `r nrow(trees|>filter(SPP=="Prunus cerasifera"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -722,9 +722,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -732,7 +732,7 @@ trees |>
 
 # Prunus serotina (Black cherry)
 n = `r nrow(trees|>filter(SPP=="Prunus serotina"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -741,9 +741,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -751,7 +751,7 @@ trees |>
 
 # Quercus alba (White oak)
 n = `r nrow(trees|>filter(SPP=="Quercus alba"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -760,9 +760,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -770,7 +770,7 @@ trees |>
 
 # Quercus bicolor (Swamp white oak)
 n = `r nrow(trees|>filter(SPP=="Quercus bicolor"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -779,9 +779,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -789,7 +789,7 @@ trees |>
 
 # Quercus falcata (Southern red oak)
 n = `r nrow(trees|>filter(SPP=="Quercus falcata"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -798,9 +798,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -808,7 +808,7 @@ trees |>
 
 # Quercus lyrata (Overcup oak)
 n = `r nrow(trees|>filter(SPP=="Quercus lyrata"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -817,9 +817,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -827,7 +827,7 @@ trees |>
 
 # Quercus macrocarpa (Bur oak)
 n = `r nrow(trees|>filter(SPP=="Quercus macrocarpa"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -836,9 +836,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -846,7 +846,7 @@ trees |>
 
 # Quercus michauxii (Swamp chesnut oak)
 n = `r nrow(trees|>filter(SPP=="Quercus michauxii"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -855,9 +855,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -865,7 +865,7 @@ trees |>
 
 # Quercus palustris (Pin oak)
 n = `r nrow(trees|>filter(SPP=="Quercus palustris"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -874,9 +874,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -884,7 +884,7 @@ trees |>
 
 # Quercus phellos (Willow oak)
 n = `r nrow(trees|>filter(SPP=="Quercus phellos"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -893,9 +893,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -903,7 +903,7 @@ trees |>
 
 # Quercus rubra (Northern red oak)
 n = `r nrow(trees|>filter(SPP=="Quercus rubra"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -912,9 +912,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -922,7 +922,7 @@ trees |>
 
 # Robinia pseudoacacia (Black locust)
 n = `r nrow(trees|>filter(SPP=="Robinia pseudoacacia"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -931,9 +931,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -941,7 +941,7 @@ trees |>
 
 # Salix nigra (Black willow)
 n = `r nrow(trees|>filter(SPP=="Salix nigra"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -950,9 +950,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -960,7 +960,7 @@ trees |>
 
 # Syringa reticulata (Japanese tree lilac)
 n = `r nrow(trees|>filter(SPP=="Syringa reticulata"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -969,9 +969,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -979,7 +979,7 @@ trees |>
 
 # Taxodium distichum (Baldcypress)
 n = `r nrow(trees|>filter(SPP=="Taxodium distichum"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -988,9 +988,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -998,7 +998,7 @@ trees |>
 
 # Thuja occidentalis (Eastern arborvitae)
 n = `r nrow(trees|>filter(SPP=="Thuja occidentalis"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -1007,9 +1007,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -1017,7 +1017,7 @@ trees |>
 
 # Tilia americana (American linden)
 n = `r nrow(trees|>filter(SPP=="Tilia americana"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -1026,9 +1026,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -1036,7 +1036,7 @@ trees |>
 
 # Tilia tomentosa (Silver linden)
 n = `r nrow(trees|>filter(SPP=="Tilia tomentosa"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -1045,9 +1045,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -1055,7 +1055,7 @@ trees |>
 
 # Ulmus americana (American elm)
 n = `r nrow(trees|>filter(SPP=="Ulmus americana"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -1064,9 +1064,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
@@ -1074,7 +1074,7 @@ trees |>
 
 # Zelkova serrata (Japanese zelkova)
 n = `r nrow(trees|>filter(SPP=="Zelkova serrata"))`
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ## 3 make maps
 
 trees |>
@@ -1083,9 +1083,9 @@ trees |>
           , layer.name = 'mean_temp_C'
           , alpha.regions = .9
           ) +
-  mapview( holc, zcol = "grade_group"
+  mapview( holc, zcol = "grade"
           , col.regions = holc_pal_group
-          , layer.name = 'grade group'
+          , layer.name = 'HOLC grade'
           , alpha.regions = .4
           ) 
 
