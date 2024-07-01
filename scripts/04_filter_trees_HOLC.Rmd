@@ -193,8 +193,8 @@ trees |>
 # 5 export 
 ```{r}
 
-# export as geopackage for making future maps
-trees |> 
+# drop unneccessary variables
+our_trees<- trees |> 
   mutate(street_address = paste0(Address, ' ', Street, ', Baltimore, MD')) |> 
   select(  Burghardt_ID
          , street_address
@@ -212,10 +212,20 @@ trees |>
          , grade
          , grade_group
          , mean_temp_C
-         ) |>
-  st_write(paste0('../grand_challenges_large/candidate_street_trees_', Sys.Date(), '.gpkg'),append = F) |>
+         )
+ 
+# export as geopackage for making future R maps
+ st_write(our_trees,paste0('../grand_challenges_large/candidate_street_trees_', Sys.Date(), '.gpkg'),append = F)
+
 # also export as spreadsheet for easy filtering to select trees
-  st_write(paste0('../grand_challenges_large/candidate_street_trees_', Sys.Date(), '.csv'))
+# create lat/long which can be used in google maps
+our_trees <- our_trees |>
+  st_transform(4326) 
+our_trees <- our_trees |>
+  mutate(long = unlist(map(our_trees$geometry,1)),
+         lat = unlist(map(our_trees$geometry,2)))
+
+st_write(our_trees,paste0('../grand_challenges_large/candidate_street_trees_', Sys.Date(), '.csv'))
 
 ```
 
