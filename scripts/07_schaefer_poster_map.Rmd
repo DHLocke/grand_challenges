@@ -52,8 +52,18 @@ spp_colors <- c(
 
 # pest density colors (none, trace, moderate, substantial)
 density_colors <- c(
-  '#fee5d9','#fcae91','#fb6a4a','#cb181d'
-  #'#fcae91','#fb6a4a','#de2d26','#a50f15'
+  #'#cbc9e2','#9e9ac8','#756bb1','#54278f' # purples
+  #'#cccccc','#969696','#636363','#252525' # grays
+  '#fee5d9','#fcae91','#fb6a4a','#cb181d' # reds
+  #'#fcae91','#fb6a4a','#de2d26','#a50f15' # darker reds
+)
+
+density_grays <- c(
+  '#cccccc','#969696','#636363','#252525'
+)
+
+density_purples <- c(
+  '#cbc9e2','#9e9ac8','#756bb1','#54278f'
 )
 
 # custom function for "Not In"
@@ -145,7 +155,12 @@ trees_sf |>
           , alpha.regions = 1
           , legend = F
           , cex = 2
-          )
+          )+
+  mapview( holc,
+    zcol = "grade"
+          , col.regions = holc_pal_group
+          , layer.name = 'HOLC grade')
+
 
 ```
 
@@ -197,13 +212,21 @@ trees_sf |>
 ```{r include=TRUE, echo=FALSE}
 trees_sf$fac_SLF<-factor(trees_sf$SLF,levels=c("None","Trace","Moderate","Substantive"))
 
+
 trees_sf |> 
   filter(!is.na(SLF)) |>
   mapview(zcol = "fac_SLF"
           , layer.name = 'SLF density'
-          , col.regions = density_colors
+          , col.regions = density_purples
           , alpha.regions = 1
-          )
+          , cex = "fac_SLF"
+          )+
+  mapview( holc, zcol = "grade"
+          , col.regions = holc_pal_group
+          , layer.name = 'HOLC grade'
+          , alpha.regions = .4
+  )
+
 
 ```
 
