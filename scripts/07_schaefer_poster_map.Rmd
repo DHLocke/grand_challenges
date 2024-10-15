@@ -276,3 +276,75 @@ holc_SLF |>
 
 ```
 
+```{r eval=FALSE, include=FALSE}
+##### exporting maps to png ##########
+
+# mapshot and mapshot2 not working. webshot works but requires a separate html for each plot 
+# (or extensive trial an error selecting the box)
+# so far running the mapview() code outside of Rmd so that it appears in Viewer tab and can Export manually
+
+# Heat across neighborhoods 2018
+
+heat_holc |> 
+  mapview(
+    zcol = 'mean_temp_C'
+    , layer.name = 'Mean Temp (C)'
+  )
+
+library('webshot2')
+
+m2 <- mapview(heat_holc)
+m2
+mapshot(m2, file = "heat_holc.png")
+mapshot2(m2, file = "heat_holc.png")
+webshot(url="file:///C:/Users/kmcgurri/Documents/grand%20challenges%20git/grand_challenges/scripts/07_schaefer_poster_map.html", 
+        file = "heat_holc.png"
+        , cliprect = "viewport"
+        , zoom = 3.5
+        )
+
+
+#### density map of SLF #######
+
+# can convert SLF data to number and bin (already did above, can do finer scales)
+# can create density map of tree locations using
+# https://www.andrewheiss.com/blog/2023/07/28/gradient-map-fills-r-sf/#fixing-overplotted-scatterplots
+# not sure yet how to create density map of SLF
+
+library(spatstat)
+
+#spatstat needs projected CRS 
+trees_proj<-st_transform(trees_sf,crs = 3857) 
+
+#get outline of baltimore city
+library(tigris)
+baci <- counties(state = "24", cb = TRUE, resolution = "500k", year = 2022) %>% 
+  filter(NAMELSAD=="Baltimore city") %>%
+  st_transform(crs=3857)
+
+# Convert the tree coordinates to a ppp object with a built-in window
+trees_ppp <- as.ppp(trees_proj$geometry, W = as.owin(baci))
+
+# Check to see if it worked
+plot(trees_ppp)
+
+# Create a stars object of the density of tree locations
+density_trees_stars <- stars::st_as_stars(density(trees_ppp, dimyx = 300))
+
+# Check to see what it looks like
+plot(density_trees_stars)
+
+# convert back to sf
+tree_density <- st_as_sf(density_trees_stars) %>%
+  st_set_crs(st_crs(trees_proj))
+
+#plot density along with original points
+plot_density <- ggplot() +
+  geom_sf(data = tree_density, aes(fill = v), color = NA) +
+  geom_sf(data = baci, fill = NA, color = "black", linewidth = 0.25) +
+  scale_fill_viridis_c(option = "magma", guide = "none")+
+  geom_sf(data = trees_sf, size = 0.3, color = "grey80")
+plot_density
+
+```
+
