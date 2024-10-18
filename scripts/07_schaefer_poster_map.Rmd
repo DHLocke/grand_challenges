@@ -307,6 +307,39 @@ webshot(url="file:///C:/Users/kmcgurri/Documents/grand%20challenges%20git/grand_
 #### density map of SLF #######
 
 # can convert SLF data to number and bin (already did above, can do finer scales)
+#get outline of baltimore city
+library(tigris)
+baci <- counties(state = "24", cb = TRUE, resolution = "500k", year = 2022) %>% 
+  filter(NAMELSAD=="Baltimore city") 
+
+# Spit the city area into a 20x20 grid
+baci_grid <- baci %>% 
+  st_make_grid(n = c(40, 40))
+
+baci_grid_map <- st_intersection(baci, baci_grid) %>% 
+  st_as_sf() %>% 
+  mutate(grid_id = 1:n())
+
+ggplot() +
+  geom_sf(data = baci_grid_map) +
+  theme_void()
+
+# join grid to data and get average per cell
+trees_sf2<-trees_sf %>%
+  st_transform(crs = st_crs(baci_grid_map)) 
+
+SLF_per_grid_box <- baci_grid_map %>%
+  st_join(trees_sf2) %>%
+  mutate(num_SLF = case_when(`SLF` == "Trace" ~ 1,
+                             `SLF` == "Moderate" ~ 2,
+                             `SLF` == "Substantive" ~ 3,
+                             `SLF` == "None" ~ 0,)) %>%
+  group_by(grid_id) %>%
+  summarize(mean_SLF = mean(num_SLF, na.rm = T))
+
+
+
+
 # can create density map of tree locations using
 # https://www.andrewheiss.com/blog/2023/07/28/gradient-map-fills-r-sf/#fixing-overplotted-scatterplots
 # not sure yet how to create density map of SLF
