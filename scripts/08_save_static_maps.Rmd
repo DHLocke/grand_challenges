@@ -1,0 +1,166 @@
+---
+title: "Baltimore City Neighborhood Maps"
+author: "Kelsey McGurrin"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "~/Documents/grand challenges git/grand_challenges")
+```
+
+```{r include=FALSE}
+## 0 set up: load libraries, custom functions, set defaults
+
+# load libraries
+# packages we'll be using
+packs <- c(
+  'tidyverse'         # a must have!
+  # , 'tidylog'         # makes things very verbose for 2x checking 
+  # , 'magrittr'        # all of the pipes
+  # , 'janitor'         # cleans things up
+  , 'sf'              # spatial support
+  #, 'tidycensus'      # Census access
+  , 'mapview'         # webmaps
+  # , 'tictoc'          # times things
+  # , 'beepr'           # makes noises
+  , 'tigris'          # download census boundaries
+  , 'ggnewscale'      # use more than one manual color scale
+  )         
+
+# check for all of the libraries
+if (length(setdiff(packs, rownames(installed.packages()))) > 0) {
+  install.packages(setdiff(packs, rownames(installed.packages())))  
+}
+
+# load them
+vapply(packs, library, character.only = TRUE, logical(1), logical.return = TRUE, quietly = TRUE)
+
+
+
+# redlining colors
+holc_pal_group <- c('#92BC6B' # green
+                    , '#92C7C9' # blue
+                    , '#E7DC6B' # yellow
+                    , '#E47D67' # red
+                    , '#A9A9A9' # dark gray)
+                    )
+
+# tree species colors
+spp_colors <- c(
+  '#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#ffff99','#b15928'
+)
+
+# pest density colors (none, trace, moderate, substantial)
+density_colors <- c(
+  #'#cbc9e2','#9e9ac8','#756bb1','#54278f' # purples
+  #'#cccccc','#969696','#636363','#252525' # grays
+  '#fee5d9','#fcae91','#fb6a4a','#cb181d' # reds
+  #'#fcae91','#fb6a4a','#de2d26','#a50f15' # darker reds
+)
+
+density_grays <- c(
+  '#cccccc','#969696','#636363','#252525'
+)
+
+density_purples <- c(
+  '#cbc9e2','#9e9ac8','#756bb1','#54278f'
+)
+
+# custom function for "Not In"
+`%nin%` <- Negate(`%in%`)
+
+
+# fixes mapview
+mapviewOptions(fgb = FALSE)
+
+```
+
+
+```{r include=FALSE}
+## 1 read in HOLC polygons
+
+#define new groups for HOLC
+(holc_lu <- 
+  tribble(
+    ~grade, ~grade_group,
+    "A",    "AB",
+    "B",    "AB",
+    "C",    "C",
+    "D",    "D"
+    ,    NA,     "industrial"
+  ))
+
+
+#join with shapefile
+holc <- st_read('output_tables/baci_holc_polygons_2024-02-20.gpkg', as_tibble = TRUE) 
+
+holc <- holc  %>% 
+    left_join(holc_lu,by="grade") %>%
+    select(area_id,geom,grade,grade_group)
+
+# rename NA grade to industrial
+holc$grade[is.na(holc$grade)]<-"industrial"
+
+```
+
+
+```{r include=FALSE}
+## 2 read in heat values for each neighborhood
+
+(heat_summary <- read_csv('output_tables/heat_summary_2024-02-27.csv') |> 
+    rename(area_id = polygon_id))
+
+heat_holc <- left_join(holc,heat_summary, by = 'area_id')
+```
+
+
+``` {r include=FALSE}
+# read in summer 2024 data as a shapefile with lat/long
+trees <- read_csv("output_tables/GC_cleaned_survey_photosynq_2024.csv")
+trees_sf<-st_as_sf(trees,coords = c("long", "lat"), crs = 4326)
+
+```
+
+
+# Spotted Lanternfly observed summer 2024
+```{r include=TRUE, echo=FALSE}
+trees_sf$fac_SLF<-factor(trees_sf$SLF,levels=c("None","Trace","Moderate","Substantive"))
+
+
+trees_sf |> 
+  filter(!is.na(SLF)) |>
+  mapview(zcol = "fac_SLF"
+          , layer.name = 'SLF density'
+          , col.regions = density_grays
+          , alpha.regions = 1
+          #, cex = 2.5
+          , cex = "fac_SLF"
+          )+
+  mapview( heat_holc, zcol = "mean_temp_C"
+          #, col.regions = holc_pal_group
+          , layer.name = 'Mean Temp (C)'
+          , alpha.regions = .4
+  )
+
+baci <- counties(state = "24", cb = TRUE, resolution = "500k", year = 2022) %>% 
+  filter(NAMELSAD=="Baltimore city")
+
+ggplot() +
+    geom_sf(data = baci, fill="white")+
+    geom_sf(data = heat_holc, aes(fill=mean_temp_C),alpha=0.6)+
+    scale_fill_viridis_c(option="plasma",name="Avg Temp (C)")+
+    new_scale_fill()+
+    geom_sf(data = filter(trees_sf,!is.na(SLF)), aes(fill= fac_SLF,size=fac_SLF),pch=21)+
+    labs(fill="SLF",size="SLF")+
+    scale_fill_manual(values=density_grays)+
+    ggtitle("Spotted Lanternfly Occurrence", subtitle = "Summer 2024")+
+    theme_void()
+
+ggsave("figures/SLF_2024.png",width=5, height=5, units=c("in"))
+
+```
+
+
+
