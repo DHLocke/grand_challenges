@@ -28,6 +28,7 @@ packs <- c(
   , 'mapview'         # webmaps
   , 'tictoc'          # times things
   , 'beepr'           # makes noises
+  , 'tigris'          # get census shapefiles
   )         
 
 # check for all of the libraries
@@ -89,7 +90,8 @@ mapviewOptions(fgb = FALSE)
 # 1 read in the land cover spatial reference system
 ```{r}
 
-(heat <- raster::raster('../grand_challenges_large/baltimore/temperature surfaces/bal_af.tif'))
+#(heat <- raster::raster('../grand_challenges_large/baltimore/temperature surfaces/bal_af.tif')) # Dexter path
+(heat <- raster::raster('../grand_challenges_large/bal_af.tif')) # Kelsey path
 
 # double checker
 heat |> mapview::mapview()
@@ -117,7 +119,23 @@ holc |> nrow()
 ```
 
 
+# ALTERNATE 2 read in census blocks
+```{r}
 
+
+blocks <- tracts(state="24",county="Baltimore city", cb=T, resolution = "500k", year = 2022) 
+
+# double check
+blocks |> mapview()
+
+# do we have a true unique id?
+blocks |> 
+  st_drop_geometry() |> 
+  distinct(TRACTCE)
+
+blocks |> nrow()
+
+```
 
 
 # 3 heat in in HOLC via slow but effective for loop
@@ -189,6 +207,51 @@ holc |>
 ```
 
 
+# ALTERNATE 3 heat in census tracts via slow but effective for loop
+```{r eval=FALSE, include=FALSE}
+n_jobs <- 3
+shp <-
+  blocks |>
+  tidylog::select(TRACTCE) |>
+  mutate(group = santoku::chop_equally(TRACTCE, n_jobs, labels = santoku::lbl_seq(start = 'A'))) 
+
+# checks
+all.equal(nrow(shp), shp$TRACTCE |> unique() |> length()) # yes!
+
+# 2x check
+shp |> st_drop_geometry() |> tabyl(group)
+
+
+
+# kth loop dispatches jobs
+# j is just a cheap progress bar
+# i is the unique polygon loop
+for(k in LETTERS[1:n_jobs]){
+  job::job({
+    tic()
+    j <- 0 # initializes cheap progress bar
+    for(i in shp |> filter(group == k) |> distinct(TRACTCE) |> pull(TRACTCE)){
+
+      print(i)             # prints the unique (for troubleshooting)
+      j <- j + 1; print(j) # prints the iterator
+
+      # the work horse of the whole operation
+      out <-
+        terra::crop(heat, shp[shp$TRACTCE == i,]) |>
+        terra::mask(shp[shp$TRACTCE == i,]) |>
+        terra::values() |>
+        mean(na.rm = TRUE)
+
+      # Output is returned as a long-form data frame with a column for plot ID, pixel class, and pixel count.
+      # Error catching code is included so that if there are no values in the circle (entirely outside raster)
+      data.frame(polygon_id = i, mean_temp_C = as.numeric(out)) |>
+        data.table::fwrite(paste0('output_tables/heat_summary_', Sys.Date(), '.csv') # PAY ATTENTION
+                           , append = TRUE) # vital!
+
+      }; toc() #; beep() # end ith loop (the individual polygons)
+  }) # end job k-th job
+  }  # end all ~16 mins w 13 jobs (cores)
+```
 
 # end
 
