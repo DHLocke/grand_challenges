@@ -123,7 +123,28 @@ holc |> nrow()
 ```{r}
 
 
-blocks <- tracts(state="24",county="Baltimore city", cb=T, resolution = "500k", year = 2022) 
+# blocks <- tracts(state="24",county="Baltimore city", cb=T, resolution = "500k", year = 2022) 
+
+# tigris::blocks(state = 'MD'
+#   , county = 'Baltimore City'
+#   , year = 2020)
+# 
+# v20 <- load_variables(2020, "sf3", cache = TRUE)
+# v20 |> View()
+# 
+# blocks <- 
+#   tidycensus::get_decennial(
+#     geography = 'block'
+#   , state = 'MD'
+#   , county = 'Baltimore City'
+#   , variables = 'P001001'
+#   , year = 2020
+#   , geometry = TRUE
+#   , output = 'wide'
+#   , moe_level = 95
+#   )
+
+
 
 # double check
 blocks |> mapview()
