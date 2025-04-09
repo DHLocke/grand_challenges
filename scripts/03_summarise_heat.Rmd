@@ -29,6 +29,7 @@ packs <- c(
   , 'tictoc'          # times things
   , 'beepr'           # makes noises
   , 'tigris'          # get census shapefiles
+  , 'santoku'
   )         
 
 # check for all of the libraries
@@ -119,42 +120,31 @@ holc |> nrow()
 ```
 
 
-# ALTERNATE 2 read in census blocks
+# ALTERNATE 2 read in census tracts
 ```{r}
 
-
-# tracts <- tracts(state="24",county="Baltimore city", cb=T, resolution = "500k", year = 2022) 
-
-# tigris::blocks(state = 'MD'
-#   , county = 'Baltimore City'
-#   , year = 2020)
-# 
-# v20 <- load_variables(2020, "pl", cache = TRUE)
-# v20 |> View()
-# 
-# blocks <-
-#   tidycensus::get_decennial(
-#     geography = 'block'
-#   , state = 'MD'
-#   , county = 'Baltimore City'
-#   , variables = 'P1_001N'
-#   , year = 2020
-#   , geometry = TRUE
-#   , output = 'wide'
-#   , moe_level = 95
-#   )
-
+tract_map<-
+  tracts(
+  state = 'Maryland',
+  county = 'Baltimore city',
+  cb = FALSE,
+  resolution = "500k",
+  year = 2020
+) |>
+  st_transform(crs = st_crs(heat))
 
 
 # double check
-blocks |> mapview()
+tract_map |> mapview()
 
 # do we have a true unique id?
-blocks |> 
+tract_map |> 
   st_drop_geometry() |> 
-  distinct(TRACTCE)
+  distinct(GEOID)
 
-blocks |> nrow()
+tract_map |> nrow()
+
+# tract_map |> st_write('../grand_challenges_large/tract_map.gpkg')
 
 ```
 
@@ -232,12 +222,12 @@ holc |>
 ```{r eval=FALSE, include=FALSE}
 n_jobs <- 3
 shp <-
-  blocks |>
-  tidylog::select(TRACTCE) |>
-  mutate(group = santoku::chop_equally(TRACTCE, n_jobs, labels = santoku::lbl_seq(start = 'A'))) 
+  tract_map |>
+  tidylog::select(GEOID) |>
+  mutate(group = santoku::chop_equally(GEOID, n_jobs, labels = santoku::lbl_seq(start = 'A'))) 
 
 # checks
-all.equal(nrow(shp), shp$TRACTCE |> unique() |> length()) # yes!
+all.equal(nrow(shp), shp$GEOID |> unique() |> length()) # yes!
 
 # 2x check
 shp |> st_drop_geometry() |> tabyl(group)
@@ -251,15 +241,15 @@ for(k in LETTERS[1:n_jobs]){
   job::job({
     tic()
     j <- 0 # initializes cheap progress bar
-    for(i in shp |> filter(group == k) |> distinct(TRACTCE) |> pull(TRACTCE)){
+    for(i in shp |> filter(group == k) |> distinct(GEOID) |> pull(GEOID)){
 
       print(i)             # prints the unique (for troubleshooting)
       j <- j + 1; print(j) # prints the iterator
 
       # the work horse of the whole operation
       out <-
-        terra::crop(heat, shp[shp$TRACTCE == i,]) |>
-        terra::mask(shp[shp$TRACTCE == i,]) |>
+        terra::crop(heat, shp[shp$GEOID == i,]) |>
+        terra::mask(shp[shp$GEOID == i,]) |>
         terra::values() |>
         mean(na.rm = TRUE)
 
