@@ -29,7 +29,9 @@ packs <- c(
   , 'tictoc'          # times things
   , 'beepr'           # makes noises
   , 'tigris'          # get census shapefiles
-  , 'santoku'
+  , 'santoku'         # divide data into nice groups
+  , 'job'             # for organizing loops
+  , 'terra'           # spatial analysis
   )         
 
 # check for all of the libraries
