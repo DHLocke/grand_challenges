@@ -135,7 +135,7 @@ holc |> nrow()
 # ) |>
 #   st_transform(crs = st_crs(heat))
 
-tract_map <- st_read('../grand_challenges_large/tract_map.gpkg')
+tract_map <- st_read('../grand_challenges_large/tract_map.gpkg', as_tibble = TRUE)
 
 # double check
 tract_map |> mapview()
@@ -266,6 +266,31 @@ for(k in LETTERS[1:n_jobs]){
   }) # end job k-th job
   }  # end all less than 3 seconds with 3 jobs (cores)
 ```
+
+### i read tract summaries back in
+```{r eval=FALSE, include=FALSE}
+# did that work?
+(heat_summary_tract <- read_csv('output_tables/heat_summary_tracts_2025-04-10.csv') |> 
+    rename(GEOID = polygon_id))
+
+# tract_map wants GEOID to be a character so let's fix that
+tract_map <- transform(tract_map, GEOID = as.numeric(GEOID))
+    
+
+# a double check
+heat_summary_tract |> distinct(GEOID) |> nrow() - shp |> nrow()
+ 
+
+# does this join back cleanly?
+tract_map |> 
+  left_join(heat_summary_tract, by = 'GEOID')
+
+tract_map |> 
+  left_join(heat_summary_tract, by = 'GEOID') |> 
+  mapview(zcol = 'mean_temp_C')
+
+```
+
 
 # end
 
