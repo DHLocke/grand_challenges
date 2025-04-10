@@ -100,7 +100,8 @@ heat |> mapview::mapview()
 ```
 
 
-# 2 read in HOLC
+# 2 read in polygons
+## A HOLC
 ```{r}
 
 (holc <- st_read('output_tables/baci_holc_polygons_2024-02-20.gpkg', as_tibble = TRUE) |> 
@@ -120,19 +121,21 @@ holc |> nrow()
 ```
 
 
-# ALTERNATE 2 read in census tracts
+## B census tracts
 ```{r}
 
-tract_map<-
-  tracts(
-  state = 'Maryland',
-  county = 'Baltimore city',
-  cb = FALSE,
-  resolution = "500k",
-  year = 2020
-) |>
-  st_transform(crs = st_crs(heat))
+# # no need to read in here, since we have it downloaded. Two roads, same
+# tract_map<-
+#   tracts(
+#   state = 'Maryland',
+#   county = 'Baltimore city',
+#   cb = FALSE,
+#   resolution = "500k",
+#   year = 2020
+# ) |>
+#   st_transform(crs = st_crs(heat))
 
+tract_map <- st_read('../grand_challenges_large/tract_map.gpkg')
 
 # double check
 tract_map |> mapview()
@@ -149,7 +152,8 @@ tract_map |> nrow()
 ```
 
 
-# 3 heat in in HOLC via slow but effective for loop
+# 3 heat summaries
+## A HOLC via slow but effective for loop
 ```{r eval=FALSE, include=FALSE}
 n_jobs <- 7
 shp <-
@@ -195,8 +199,7 @@ for(k in LETTERS[1:n_jobs]){
   }  # end all ~16 mins w 13 jobs (cores)
 ```
 
-
-
+### i read those summaries back in
 ```{r eval=FALSE, include=FALSE}
 # did that work?
 (heat_summary <- read_csv('output_tables/heat_summary_2024-02-27.csv') |> 
@@ -218,7 +221,7 @@ holc |>
 ```
 
 
-# ALTERNATE 3 heat in census tracts via slow but effective for loop
+# B. Census tracts via slow but effective for loop
 ```{r eval=FALSE, include=FALSE}
 n_jobs <- 3
 shp <-
@@ -256,12 +259,12 @@ for(k in LETTERS[1:n_jobs]){
       # Output is returned as a long-form data frame with a column for plot ID, pixel class, and pixel count.
       # Error catching code is included so that if there are no values in the circle (entirely outside raster)
       data.frame(polygon_id = i, mean_temp_C = as.numeric(out)) |>
-        data.table::fwrite(paste0('output_tables/heat_summary_', Sys.Date(), '.csv') # PAY ATTENTION
+        data.table::fwrite(paste0('output_tables/heat_summary_tracts_', Sys.Date(), '.csv') # PAY ATTENTION
                            , append = TRUE) # vital!
 
       }; toc() #; beep() # end ith loop (the individual polygons)
   }) # end job k-th job
-  }  # end all ~16 mins w 13 jobs (cores)
+  }  # end all less than 3 seconds with 3 jobs (cores)
 ```
 
 # end
