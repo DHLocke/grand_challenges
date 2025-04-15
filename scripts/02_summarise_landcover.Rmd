@@ -90,6 +90,9 @@ mapviewOptions(fgb = FALSE)
 ```{r}
 
 # how does this match up with the land cove data?
+# this dataset
+# https://cicwebresources.blob.core.windows.net/lulc1718/balt_24510/balt_24510_lulc_change_2013_2018.zip
+# download
 lcc_path <- '/Users/dlocke/tree_temp_change/large_data/balt_24510_lc_change_2013_2018'
 
 
@@ -121,7 +124,7 @@ lcc_path <- '/Users/dlocke/tree_temp_change/large_data/balt_24510_lc_change_2013
 # 2 read in HOLC
 ```{r}
 
-(holc <- st_read('../grand_challenges_large/baci_holc_polygons_2024-02-20.gpkg', as_tibble = TRUE))
+(holc <- st_read('output_tables/baci_holc_polygons_2024-02-20.gpkg', as_tibble = TRUE))
 
 # double check
 holc |> mapview()
@@ -180,7 +183,7 @@ for(k in LETTERS[1:n_jobs]){
           data.table::fwrite(paste0('output_tables/lcc_summary_', Sys.Date(), '.csv') # PAY ATTENTION
                     , append = TRUE) # vital!
         } else {
-          data.frame(polygon_id = character(0), class = character(0), pixel_count = numeric(0)) |> 
+          data.frame(polygon_id = i, class = character(0), pixel_count = numeric(0)) |> 
             data.table::fwrite(paste0('output_tables/lcc_summary_', Sys.Date(), '.csv') # PAY ATTENTION
                       , append = TRUE)
           }
