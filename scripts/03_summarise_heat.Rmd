@@ -32,6 +32,7 @@ packs <- c(
   , 'santoku'         # divide data into nice groups
   , 'job'             # for organizing loops
   , 'terra'           # spatial analysis
+  , 'raster'          # raster spatial
   )         
 
 # check for all of the libraries
@@ -85,7 +86,11 @@ mget(sf_in_memory) %>% purrr::map(~st_crs(.x)$epsg) %>% unlist() #%>% View()
 
 
 # fixes mapview
-mapviewOptions(fgb = FALSE)
+mapviewOptions(
+    legend.pos = 'bottomleft'
+  , layers.control.pos = 'topright'
+  , fgb = FALSE
+)
 
 ```
 
@@ -137,7 +142,8 @@ holc |> nrow()
 # ) |>
 #   st_transform(crs = st_crs(heat))
 
-tract_map <- st_read('../grand_challenges_large/tract_map.gpkg', as_tibble = TRUE)
+tract_map <- st_read('../grand_challenges_large/tract_map.gpkg', as_tibble = TRUE) |> 
+  muate(GEOID = as.numeric(GEOID))
 
 # double check
 tract_map |> mapview()
@@ -275,8 +281,8 @@ for(k in LETTERS[1:n_jobs]){
 (heat_summary_tract <- read_csv('output_tables/heat_summary_tracts_2025-04-10.csv') |> 
     rename(GEOID = polygon_id))
 
-# tract_map wants GEOID to be a character so let's fix that
-tract_map <- transform(tract_map, GEOID = as.numeric(GEOID))
+# # tract_map wants GEOID to be a character so let's fix that
+# tract_map <- transform(tract_map, GEOID = as.numeric(GEOID))
     
 
 # a double check
@@ -292,6 +298,76 @@ tract_map |>
   mapview(zcol = 'mean_temp_C')
 
 ```
+
+
+# 4 heat: raster to points
+```{r}
+
+# this is borrowed from '07_schaefer_poster_map.Rmd'
+trees_sf <- 
+  # wanted a trees file, used csv from script above
+  read_csv("output_tables/GC_cleaned_survey_photosynq_2024_notes_split.csv") |> 
+  st_as_sf(coords = c("long", "lat"), crs = 4326) |> # made spatial
+  st_transform(crs = st_crs(heat)) # reprojected to match heat (heat is large, points small)
+
+# sanity checks
+trees_sf |> glimpse()
+trees_sf |> mapview(zcol = 'SPP') + mapview(heat)
+
+# extract temperature from the raster to the points.
+trees_sf <-
+  trees_sf |> 
+    mutate(temp_C = raster::extract(heat, trees_sf)) # if a lot of points, consider saving *.csv
+
+# double checks
+trees_sf |> glimpse()
+
+trees_sf |> mapview(zcol = 'temp_C') + mapview(heat)
+
+m1 <- trees_sf |> mapview(zcol = 'temp_C', layer.name = 'raster')
+m2 <- trees_sf |> mapview(zcol = 'Leaf Temperature', layer.name = 'Leaf<br>Temp.')
+m3 <- trees_sf |> mapview(zcol = 'Ambient Temperature', layer.name = 'Ambient<br>Temp.')
+
+leafsync::sync(m1, m2, m3)
+
+# how are each of these measures of temperature distributed?
+trees_sf |> 
+  st_drop_geometry() |> 
+  select(Burghardt_ID, temp_C, mean_temp_C, `Leaf Temperature`, `Ambient Temperature`) |> 
+  pivot_longer(-Burghardt_ID) |> 
+  ggplot(aes(value)) +
+  geom_density() + 
+  facet_wrap(~name) + 
+  theme_bw(16) +
+  NULL
+
+# how do these temperature measures co-vary?
+trees_sf |> 
+  st_drop_geometry() |> 
+  select(Burghardt_ID, temp_C, mean_temp_C, `Leaf Temperature`, `Ambient Temperature`) |> 
+  pivot_longer(-c(Burghardt_ID, temp_C)) |> 
+  ggplot(aes(temp_C, value)) +
+  geom_point() + 
+  geom_smooth() +
+  geom_smooth(method = 'lm', color = 'red') +
+  facet_wrap(~name) + 
+  theme_bw(16) +
+  NULL
+
+# how do these temperature measures correlate?
+trees_sf |> 
+  st_drop_geometry() |> 
+  select(temp_C, mean_temp_C, `Leaf Temperature`, `Ambient Temperature`) |> 
+  correlation::correlation()
+
+trees_sf |> 
+  st_drop_geometry() |> 
+  select(temp_C, mean_temp_C, `Leaf Temperature`, `Ambient Temperature`) |> 
+  correlation::correlation() |> 
+  summary()
+
+```
+
 
 
 # end
