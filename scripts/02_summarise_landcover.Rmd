@@ -28,6 +28,7 @@ packs <- c(
   , 'mapview'         # webmaps
   , 'tictoc'          # times things
   , 'beepr'           # makes noises
+  , 'foreign'         # read DBF files
   )         
 
 # check for all of the libraries
@@ -93,15 +94,15 @@ mapviewOptions(fgb = FALSE)
 # this dataset
 # https://cicwebresources.blob.core.windows.net/lulc1718/balt_24510/balt_24510_lulc_change_2013_2018.zip
 # download
-lcc_path <- '/Users/dlocke/tree_temp_change/large_data/balt_24510_lc_change_2013_2018'
-
+#lcc_path <- '/Users/dlocke/tree_temp_change/large_data/balt_24510_lc_change_2013_2018'
+lcc_path <- '/Users/mschaef9/Documents/grand challenges git/grand_challenges_large'
 
 (lcc <- raster::raster(paste0(lcc_path, '/balt_24510_landcoverchange_20132018.tif')))
 
-
+# Making a lookup table between raster code values, land cover change, land cover per year, and color pallette
 (
   lcc_key <-
-    foreign::read.dbf('/Users/dlocke/Chess_Bay_LC/md_lc-change_2013-2018_2022-Edition/md_lc-change_2013-2018_2022-Edition.tif.vat.dbf') |>
+    foreign::read.dbf('/Users/mschaef9/Documents/grand challenges git/grand_challenges_large/md_lc-change_2013-2018_2022-Edition.tif.vat.dbf') |>
     tidylog::select(ID = Value, LCChange, ChangeType, Red : Alpha) |>
     mutate(LCChange = str_replace_all(LCChange, 'Scrub\\\\Shrub', 'Scrub Shrub')) |>
     separate(LCChange, into = c('y_2013', 'y_2018'), sep = ' to ', remove = FALSE) |>
@@ -121,7 +122,8 @@ lcc_path <- '/Users/dlocke/tree_temp_change/large_data/balt_24510_lc_change_2013
 ```
 
 
-# 2 read in HOLC
+# 2 read in polygons
+## A HOLC
 ```{r}
 
 (holc <- st_read('output_tables/baci_holc_polygons_2024-02-20.gpkg', as_tibble = TRUE))
@@ -139,8 +141,30 @@ holc |> nrow()
 ```
 
 
+## B census tracts
+```{r}
 
-# 3 summarise land cover in in HOLC via slow but effective for loop
+tract_map <- st_read('../grand_challenges_large/tract_map.gpkg', as_tibble = TRUE) |> 
+  mutate(GEOID = as.numeric(GEOID)) |>
+  st_transform(st_crs(lcc))
+
+# double check
+tract_map |> mapview()
+
+# do we have a true unique id?
+tract_map |> 
+  st_drop_geometry() |> 
+  distinct(GEOID)
+
+tract_map |> nrow()
+
+# tract_map |> st_write('../grand_challenges_large/tract_map.gpkg')
+
+```
+
+
+# 3 summarise land cover via slow but effective for loop
+## A HOLC
 ```{r eval=FALSE, include=FALSE}
 
 n_jobs <- 7
@@ -227,6 +251,92 @@ holc_pct_tc_2018 |>
 ```
 
 
+## B census tracts
+```{r eval=FALSE, include=FALSE}
+
+n_jobs <- 3
+shp <-
+  tract_map |>
+  tidylog::select(GEOID) |>
+  mutate(group = santoku::chop_equally(GEOID, n_jobs, labels = santoku::lbl_seq(start = 'A'))) 
+
+# checks
+all.equal(nrow(shp), shp$GEOID |> unique() |> length()) # yes!
+
+# 2x check
+shp |> st_drop_geometry() |> tabyl(group)
+
+
+
+# kth loop dispatches jobs
+# j is just a cheap progress bar
+# i is the unique polygon loop
+for(k in LETTERS[1:n_jobs]){
+  job::job({
+    tic()
+    j <- 0 # initializes cheap progress bar
+    for(i in shp |> filter(group == k) |> distinct(GEOID) |> pull(GEOID)){
+
+      print(i)             # prints the unique (for troubleshooting)
+      j <- j + 1; print(j) # prints the iterator
+
+      # the work horse of the whole operation
+      out <-
+        terra::crop(lcc, shp[shp$GEOID == i,]) |>
+        terra::mask(shp[shp$GEOID == i,]) |>
+        terra::values() |>
+        table()
+
+      # Output is returned as a long-form data frame with a column for plot ID, pixel class, and pixel count.
+      # Error catching code is included so that if there are no values in the circle (entirely outside raster)
+      if (length(out) > 0) {
+        data.frame(polygon_id = i, class = names(out), pixel_count = as.numeric(out)) |>
+          data.table::fwrite(paste0('output_tables/lcc_summary_tracts_', Sys.Date(), '.csv') # PAY ATTENTION
+                    , append = TRUE) # vital!
+        } else {
+          data.frame(polygon_id = i, class = character(0), pixel_count = numeric(0)) |> 
+            data.table::fwrite(paste0('output_tables/lcc_summary_tracts_', Sys.Date(), '.csv') # PAY ATTENTION
+                      , append = TRUE)
+          }
+      }; toc() #; beep() # end ith loop (the individual polygons)
+  }) # end job k-th job
+  }  # end all ~16 mins w 13 jobs (cores)
+
+
+# did that work?
+(lcc_summary_tracts <- read_csv('output_tables/lcc_summary_tracts_2025-04-21.csv') |> 
+    rename(GEOID = polygon_id))
+    
+
+# a double check
+lcc_summary_tracts |> distinct(GEOID) |> nrow() - shp |> nrow()
+ 
+tract_pct_tc_2018 <- 
+  lcc_summary_tracts |> 
+  left_join(lcc_key, by = c('class' = 'ID')) |> 
+  group_by(GEOID) |> 
+  mutate(area = sum(pixel_count)) |> 
+  ungroup() |> 
+  mutate(pct_area = 100*(pixel_count / area)) |> 
+  filter(str_detect(y_2018, 'Tree')) |> # tabyl(y_2018) # gets tree canopy class only
+  group_by(GEOID) |> 
+  summarise(pct_tc_18 = sum(pct_area))
+  
+tract_pct_tc_2018
+
+# does this join back cleanly?
+tract_map |> 
+  left_join(tract_pct_tc_2018, by = 'GEOID')
+
+tract_map |> 
+  left_join(tract_pct_tc_2018, by = 'GEOID') |> 
+  mapview(zcol = 'pct_tc_18')
+
+# write out
+tract_pct_tc_2018 |> 
+  write_csv(paste0('output_tables/tract_pct_tc_2018_', Sys.Date(), '.csv'))
+
+```
 
 # end
 

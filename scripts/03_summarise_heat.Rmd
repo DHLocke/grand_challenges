@@ -143,7 +143,7 @@ holc |> nrow()
 #   st_transform(crs = st_crs(heat))
 
 tract_map <- st_read('../grand_challenges_large/tract_map.gpkg', as_tibble = TRUE) |> 
-  muate(GEOID = as.numeric(GEOID))
+  mutate(GEOID = as.numeric(GEOID))
 
 # double check
 tract_map |> mapview()
