@@ -90,19 +90,27 @@ mapviewOptions(fgb = FALSE)
 ## 1 read in the land cover spatial reference system
 ```{r}
 
-# how does this match up with the land cove data?
-# this dataset
-# https://cicwebresources.blob.core.windows.net/lulc1718/balt_24510/balt_24510_lulc_change_2013_2018.zip
-# download
+# how does this match up with the land cover data?
+
+# download data to the lcc_path folder below
+# you have to go to the map, click on baltimore city county, and then a list of available downloads pops up.
+# select "Land Cover Change"
+# https://cicgis.org/portal/apps/webappviewer/index.html?id=bdf7ca3e249a40fd9a9d83d6e16100ea&extent=-88.252,35.0981,-62.3462,45.7489
+
+# for whole state of maryland, download here
+# https://www.sciencebase.gov/catalog/item/63334dc3d34e900e86c62264 
+
+
 #lcc_path <- '/Users/dlocke/tree_temp_change/large_data/balt_24510_lc_change_2013_2018'
-lcc_path <- '/Users/mschaef9/Documents/grand challenges git/grand_challenges_large'
+#lcc_path <- '/Users/mschaef9/Documents/grand challenges git/grand_challenges_large'
+lcc_path <- '~/Documents/grand challenges git/grand_challenges_large'
 
 (lcc <- raster::raster(paste0(lcc_path, '/balt_24510_landcoverchange_20132018.tif')))
 
 # Making a lookup table between raster code values, land cover change, land cover per year, and color pallette
 (
   lcc_key <-
-    foreign::read.dbf('/Users/mschaef9/Documents/grand challenges git/grand_challenges_large/md_lc-change_2013-2018_2022-Edition.tif.vat.dbf') |>
+    foreign::read.dbf(paste0(lcc_path,'/md_lc-change_2013-2018_2022-Edition.tif.vat.dbf')) |>
     tidylog::select(ID = Value, LCChange, ChangeType, Red : Alpha) |>
     mutate(LCChange = str_replace_all(LCChange, 'Scrub\\\\Shrub', 'Scrub Shrub')) |>
     separate(LCChange, into = c('y_2013', 'y_2018'), sep = ' to ', remove = FALSE) |>
