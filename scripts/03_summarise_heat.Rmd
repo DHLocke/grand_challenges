@@ -435,6 +435,16 @@ trees_sf_buffered |>
   left_join(heat_summary_buffer, by = 'Burghardt_ID') |> 
   mapview(zcol = 'buffer_temp_C')
 
+
+# export csv for picking 2025 data logger locations
+trees<- read_csv("output_tables/GC_cleaned_survey_photosynq_2024_notes_split.csv") |> dplyr::select(Burghardt_ID,lat,long)
+trees2<-left_join(trees_sf_buffered,trees)
+loggers<-
+  left_join(trees2,heat_summary_buffer, by = 'Burghardt_ID') |>
+  st_drop_geometry()
+
+write_csv(loggers,paste0('output_tables/candidate_logger_trees_', Sys.Date(), '.csv'),append=F)
+
 ```
 
 ## B buffer for 2025 tree list
