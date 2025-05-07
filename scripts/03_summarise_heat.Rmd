@@ -1,6 +1,6 @@
 ---
 title: "03_summarise_heat"
-author: "Kelsey McGurrin Dexter H. Locke"
+author: "Kelsey McGurrin Dexter H. Locke Maggie Schaefer"
 date: "`r format(Sys.time())`"
 output: html_document
 editor_options: 
@@ -301,6 +301,7 @@ tract_map |>
 
 
 # 4 heat: raster to points
+## A buffers for 2024 tree list
 ```{r}
 
 # this is borrowed from '07_schaefer_poster_map.Rmd'
@@ -433,6 +434,112 @@ trees_sf_buffered |>
 trees_sf_buffered |> 
   left_join(heat_summary_buffer, by = 'Burghardt_ID') |> 
   mapview(zcol = 'buffer_temp_C')
+
+```
+
+## B buffer for 2025 tree list
+```{r}
+
+# this is borrowed from '07_schaefer_poster_map.Rmd'
+trees_sf <- 
+  # wanted a trees file, used csv from script above
+  read_csv("../grand_challenges_large/candidate_street_trees_2025-05-07.csv") |> 
+  st_as_sf(coords = c("long", "lat"), crs = 4326) |> # made spatial
+  st_transform(crs = st_crs(heat)) # reprojected to match heat (heat is large, points small)
+
+# sanity checks
+trees_sf |> glimpse()
+trees_sf |> mapview(zcol = 'SPP') + mapview(heat)
+
+# extract temperature from the raster to the points.
+trees_sf <-
+  trees_sf |> 
+    mutate(temp_C = raster::extract(heat, trees_sf)) # if a lot of points, consider saving *.csv
+
+# double checks
+trees_sf |> glimpse()
+
+trees_sf |> mapview(zcol = 'temp_C') + mapview(heat)
+
+
+## With a buffer around the tree
+st_crs(trees_sf)$units # check units
+trees_sf_buffered <- st_buffer(trees_sf, dist = 15) #make 15 meter buffer
+
+# sanity checks
+trees_sf_buffered |> glimpse()
+trees_sf_buffered |> mapview(zcol = 'SPP') + mapview(heat)
+
+# extract temp from raster to buffer
+n_jobs <- 3
+shp <-
+  trees_sf_buffered |>
+  tidylog::select(Burghardt_ID) |>
+  mutate(group = santoku::chop_equally(Burghardt_ID, n_jobs, labels = santoku::lbl_seq(start = 'A'))) 
+
+# checks
+all.equal(nrow(shp), shp$Burghardt_ID |> unique() |> length()) # yes!
+
+# 2x check
+shp |> st_drop_geometry() |> tabyl(group)
+
+
+
+# kth loop dispatches jobs
+# j is just a cheap progress bar
+# i is the unique polygon loop
+for(k in LETTERS[1:n_jobs]){
+  job::job({
+    tic()
+    j <- 0 # initializes cheap progress bar
+    for(i in shp |> filter(group == k) |> distinct(Burghardt_ID) |> pull(Burghardt_ID)){
+
+      print(i)             # prints the unique (for troubleshooting)
+      j <- j + 1; print(j) # prints the iterator
+
+      # the work horse of the whole operation
+      out <-
+        terra::crop(heat, shp[shp$Burghardt_ID == i,]) |>
+        terra::mask(shp[shp$Burghardt_ID == i,]) |>
+        terra::values() |>
+        mean(na.rm = TRUE)
+
+      # Output is returned as a long-form data frame with a column for plot ID, pixel class, and pixel count.
+      # Error catching code is included so that if there are no values in the circle (entirely outside raster)
+      data.frame(polygon_id = i, buffer_temp_C = as.numeric(out)) |>
+        data.table::fwrite(paste0('output_tables/heat_summary_buffer_', Sys.Date(), '.csv') # PAY ATTENTION
+                           , append = TRUE) # vital!
+
+      }; toc() #; beep() # end ith loop (the individual polygons)
+  }) # end job k-th job
+  }  # end all less than 3 seconds with 3 jobs (cores)
+
+(heat_summary_buffer <- read_csv('output_tables/heat_summary_buffer_2025-05-07.csv') |> 
+    rename(Burghardt_ID = polygon_id))
+
+# a double check
+heat_summary_buffer |> distinct(Burghardt_ID) |> nrow() - shp |> nrow()
+ 
+
+# does this join back cleanly?
+trees_sf_buffered |> 
+  left_join(heat_summary_buffer, by = 'Burghardt_ID')
+
+trees_sf_buffered |> 
+  left_join(heat_summary_buffer, by = 'Burghardt_ID') |> 
+  mapview(zcol = 'buffer_temp_C')
+
+maggie_trees<-trees_sf_buffered |> 
+  st_join(trees_sf,by='Burghardt_ID')
+
+trees<- read_csv("../grand_challenges_large/candidate_street_trees_2025-05-07.csv") |> dplyr::select(Burghardt_ID,lat,long)
+trees2<-left_join(trees_sf_buffered,trees)
+trees3<-
+  left_join(trees2,heat_summary_buffer, by = 'Burghardt_ID') |>
+  st_drop_geometry()
+
+# export as csv
+write_csv(trees3,paste0('../grand_challenges_large/candidate_street_trees_', Sys.Date(), '.csv'),append=F)
 
 ```
 
