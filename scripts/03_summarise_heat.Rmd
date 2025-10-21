@@ -10,6 +10,7 @@ editor_options:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = 'Documents/grand challenges git/grand_challenges')
 ```
 
   
@@ -307,7 +308,7 @@ tract_map |>
 # this is borrowed from '07_schaefer_poster_map.Rmd'
 trees_sf <- 
   # wanted a trees file, used csv from script above
-  read_csv("output_tables/GC_cleaned_survey_photosynq_2024_notes_split.csv") |> 
+  read_csv("output_tables/24_25_cleaned.csv") |> 
   st_as_sf(coords = c("long", "lat"), crs = 4326) |> # made spatial
   st_transform(crs = st_crs(heat)) # reprojected to match heat (heat is large, points small)
 
