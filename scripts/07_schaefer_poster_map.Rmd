@@ -133,13 +133,13 @@ holc |>
 ```
 
 ``` {r include=FALSE}
-# read in summer 2024 data as a shapefile with lat/long
-trees <- read_csv("output_tables/GC_cleaned_survey_photosynq_2024_notes_split.csv")
+# read in summer 2024 and 2025 data as a shapefile with lat/long
+trees <- read_csv("output_tables/24_25_cleaned.csv")
 trees_sf<-st_as_sf(trees,coords = c("long", "lat"), crs = 4326)
 
 ```
 
-# All trees sampled summer 2024
+# All trees sampled summer 2024 and 2025
 ## Background HOLC grades
 ``` {r include=TRUE, echo=FALSE}
 # trees_sf |> 
@@ -165,7 +165,7 @@ trees_sf |>
 
 ```
 
-# All trees sampled summer 2024
+# All trees sampled summer 2024 and 2025
 ## Background Neighborhood temps
 ``` {r include=TRUE, echo=FALSE}
 
@@ -230,7 +230,7 @@ trees_sf |>
 
 ```
 
-# Spotted Lanternfly observed summer 2024
+# Spotted Lanternfly observed summer 2024 amd 2025
 ```{r include=TRUE, echo=FALSE}
 trees_sf$fac_SLF<-factor(trees_sf$SLF,levels=c("None","Trace","Moderate","Substantive"))
 
@@ -239,20 +239,19 @@ trees_sf |>
   filter(!is.na(SLF)) |>
   mapview(zcol = "fac_SLF"
           , layer.name = 'SLF density'
-          , col.regions = density_purples
+          , col.regions = density_grays
           , alpha.regions = 1
-          , cex = "fac_SLF"
+          , cex = "fac_SLF"/100
           )+
-  mapview( holc, zcol = "grade"
-          , col.regions = holc_pal_group
-          , layer.name = 'HOLC grade'
-          , alpha.regions = .4
-  )
+  mapview( heat_holc,
+          zcol = 'mean_temp_C'
+          , layer.name = 'Mean Temp (C)'
+          )
 
 
 ```
 
-# Spotted Lanternfly on Liquidambar styraciflua summer 2024
+# Spotted Lanternfly on Liquidambar styraciflua summer 2024 and 2025
 ```{r include=TRUE, echo=FALSE}
 
 trees_sf |> 
@@ -272,7 +271,7 @@ trees_sf |>
 
 ```
 
-# Average SLF per neighborhood summer 2024
+# Average SLF per neighborhood summer 2024 and 2025
 ```{r include=TRUE, echo=FALSE}
 SLF_summary<- trees_sf %>%
   mutate(num_SLF = case_when(`SLF` == "Trace" ~ 1,
