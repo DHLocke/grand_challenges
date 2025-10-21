@@ -1,0 +1,233 @@
+---
+title: "09_correlations"
+author: "Kelsey McGurrin Dexter H. Locke Maggie Schaefer"
+date: "`r format(Sys.time())`"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = 'Documents/grand challenges git/grand_challenges')
+```
+
+
+## 0 set up: load libraries, custom functions, set defaults
+```{r}
+
+# load libraries
+# packages we'll be using
+packs <- c(
+  'tidyverse'         # a must have!
+  , 'tidylog'         # makes things very verbose for 2x checking 
+  , 'magrittr'        # all of the pipes
+  , 'janitor'         # cleans things up
+  , 'sf'              # spatial support
+  , 'tidycensus'      # Census access
+  , 'mapview'         # webmaps
+  , 'tictoc'          # times things
+  , 'beepr'           # makes noises
+  , 'foreign'         # read DBF files
+  )         
+
+# check for all of the libraries
+if (length(setdiff(packs, rownames(installed.packages()))) > 0) {
+  install.packages(setdiff(packs, rownames(installed.packages())))  
+}
+
+# load them
+vapply(packs, library, character.only = TRUE, logical(1), logical.return = TRUE, quietly = TRUE)
+
+
+
+# keep random things consistent
+# set.seed(19870630) # needed?
+
+
+# redlining colors
+holc_pal <- c('#92BC6B' # green
+              , '#92C7C9' # blue
+              , '#E7DC6B' # yellow
+              , '#E47D67' # red
+              #, '#A9A9A9'
+              ) # dark gray)
+
+holc_pal_f<- c('#92BC6B' # green
+              , '#92C7C9' # blue
+              , '#E7DC6B' # yellow
+              , '#E47D67' # red
+              , '#A9A9A9'
+              , '#000000')
+
+
+# set custom function for getting spatial data
+see_sf <- function(){
+# what's in memory that are sf - spatial features?
+keep(eapply(.GlobalEnv, class),      # gets the objects in the global environment
+     ~ any(str_detect(., "sf"))) %>% # selects elements with sf in them
+    names(.) %>% as.character(.)     # my simple features
+}
+
+see_sf() -> sf_in_memory
+
+# what are the spatial references of those SF classes?
+mget(sf_in_memory) %>% purrr::map(~st_crs(.x)$epsg) %>% unlist() #%>% View()
+
+
+# # get file size
+
+# custom function for "Not In"
+`%nin%` <- Negate(`%in%`)
+
+
+# fixes mapview
+mapviewOptions(fgb = FALSE)
+
+```
+
+## 1 load in trees (2024 and 2025)
+```{r}
+# read in summer 2024 and 2025 data as a shapefile with lat/long
+trees_sf <- 
+  # wanted a trees file, used csv from script above
+  read_csv('output_tables/24_25_cleaned.csv') |> 
+  st_as_sf(coords = c("long", "lat"), crs = 4326) |> # made spatial
+  st_transform(crs = st_crs(lcc)) # reprojected to match land cover (lcc is large, points small)
+
+```
+
+# 2 Percent Tree Canopy
+## A HOLC
+```{r}
+# Made in 02_summarise_landcover
+tc_summary <- 
+  read_csv("~/grand challenges git/grand_challenges/output_tables/holc_pct_tc_2018_2025-04-21.csv")
+
+trees_sf <- 
+  trees_sf |> 
+  left_join(tc_summary, by = 'area_id')
+
+# did that work?
+trees_sf |> st_drop_geometry() |> tabyl(pct_tc_18, grade_group)
+
+trees_sf |> 
+  mapview(zcol = 'pct_tc_18')
+
+holc |> 
+  left_join(holc_pct_tc_2018, by = 'area_id') |> 
+  mapview(zcol = 'pct_tc_18')
+
+```
+
+## B Buffers of sampled trees
+```{r}
+# made in 02_summarise_landcover
+(lcc_summary_buffer <- read_csv('output_tables/lcc_summary_buffer2025-10-06.csv') |> 
+    rename(Burghardt_ID = polygon_id))
+
+# a double check
+lcc_summary_buffer |> distinct(Burghardt_ID) |> nrow() - shp |> nrow()
+
+# now calculate percent tree canopy in buffers
+buffer_pct_tc_2018 <- 
+  lcc_summary_buffer |> 
+  left_join(lcc_key, by = c('class' = 'ID')) |> 
+  group_by(Burghardt_ID) |> 
+  mutate(area = sum(pixel_count)) |> 
+  ungroup() |> 
+  mutate(pct_area = 100*(pixel_count / area)) |> 
+  filter(str_detect(y_2018, 'Tree')) |> # tabyl(y_2018) # gets tree canopy class only
+  group_by(Burghardt_ID) |> 
+  summarise(pct_tc_18_buffered = sum(pct_area))
+  
+
+# does this join back cleanly?
+trees_sf_buffered <- trees_sf_buffered |> 
+  left_join(buffer_pct_tc_2018, by = 'Burghardt_ID')
+
+trees_sf_buffered |> 
+  mapview(zcol = 'pct_tc_18_buffered')
+
+maggie_trees<-trees_sf_buffered |> 
+  st_join(trees_sf,by='Burghardt_ID')
+
+```
+
+
+# 3 Impervious Surface
+## A HOLC
+```{r}
+# Made in 02_summarise_landcover
+(lcc_summary <- read_csv('output_tables/lcc_summary_2024-02-20.csv') |> 
+    rename(area_id = polygon_id))
+    
+# a double check
+lcc_summary |> distinct(area_id) |> nrow() - shp |> nrow()
+
+holc_pct_imp_2018 <- 
+  lcc_summary |> 
+  left_join(lcc_key, by = c('class' = 'ID')) |> 
+  group_by(area_id) |> 
+  mutate(area = sum(pixel_count)) |> 
+  ungroup() |> 
+  mutate(pct_area = 100*(pixel_count / area)) |> 
+  filter(str_detect(y_2018, 'Impervious')) |> # tabyl(y_2018) # gets tree canopy class only
+  group_by(area_id) |> 
+  summarise(pct_imp_18 = sum(pct_area))
+  
+holc_pct_imp_2018
+
+# does this join back cleanly?
+holc |> 
+  left_join(holc_pct_imp_2018, by = 'area_id')
+
+holc |> 
+  left_join(holc_pct_imp_2018, by = 'area_id') |> 
+  mapview(zcol = 'pct_imp_18')
+```
+
+## B buffer for sampled trees
+```{r}
+buffer_pct_imp_2018 <- 
+  lcc_summary_buffer |> 
+  left_join(lcc_key, by = c('class' = 'ID')) |> 
+  group_by(Burghardt_ID) |> 
+  mutate(area = sum(pixel_count)) |> 
+  ungroup() |> 
+  mutate(pct_area = 100*(pixel_count / area)) |> 
+  filter(str_detect(y_2018, 'Impervious')) |> # tabyl(y_2018) # gets tree canopy class only
+  group_by(Burghardt_ID) |> 
+  summarise(pct_imp_18_buffered = sum(pct_area))
+  
+
+# does this join back cleanly?
+trees_sf_buffered <- trees_sf_buffered |> 
+  left_join(buffer_pct_imp_2018, by = 'Burghardt_ID')
+
+trees_sf_buffered |> 
+  mapview(zcol = 'pct_imp_18_buffered')
+
+```
+
+# 4 Correlations
+```{r}
+# Join datasets
+## Neighborhood correlations
+neigh_cor <- 
+  left_join(holc_pct_imp_2018,holc_pct_tc_2018, by='area_id') |>
+  left_join(heat_summary, by='area_id')
+
+# correlation matrix
+cor(neigh_cor)
+
+## Buffer correlations
+buffer_cor <- 
+  left_join(buffer_pct_imp_2018,buffer_pct_tc_2018, by='Burghardt_ID') |>
+  left_join(heat_summary_buffer, by='Burghardt_ID') |>
+  drop_na()
+
+# correlation matrix
+cor(buffer_cor)
+
+```
