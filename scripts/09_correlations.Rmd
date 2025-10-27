@@ -102,7 +102,7 @@ trees_sf <-
 ```{r}
 # Made in 02_summarise_landcover
 tc_summary <- 
-  read_csv("~/grand challenges git/grand_challenges/output_tables/holc_pct_tc_2018_2025-04-21.csv")
+  read_csv("~/Documents/grand challenges git/grand_challenges/output_tables/holc_pct_tc_2018_2024-02-20.csv")
 
 trees_sf <- 
   trees_sf |> 
@@ -113,6 +113,11 @@ trees_sf |> st_drop_geometry() |> tabyl(pct_tc_18, grade_group)
 
 trees_sf |> 
   mapview(zcol = 'pct_tc_18')
+
+(holc <- st_read('output_tables/baci_holc_polygons_2024-02-20.gpkg', as_tibble = TRUE))
+
+holc_pct_tc_2018 <- 
+  read_csv("~/Documents/grand challenges git/grand_challenges/output_tables/holc_pct_tc_2018_2024-02-20.csv")
 
 holc |> 
   left_join(holc_pct_tc_2018, by = 'area_id') |> 
@@ -128,6 +133,25 @@ holc |>
 
 # a double check
 lcc_summary_buffer |> distinct(Burghardt_ID) |> nrow() - shp |> nrow()
+
+(
+  lcc_key <-
+    foreign::read.dbf(paste0(lcc_path,'/md_lc-change_2013-2018_2022-Edition.tif.vat.dbf')) |>
+    tidylog::select(ID = Value, LCChange, ChangeType, Red : Alpha) |>
+    mutate(LCChange = str_replace_all(LCChange, 'Scrub\\\\Shrub', 'Scrub Shrub')) |>
+    separate(LCChange, into = c('y_2013', 'y_2018'), sep = ' to ', remove = FALSE) |>
+    mutate(  y_2018 = ifelse(is.na(y_2018), y_2013, y_2018) # stability
+           , tcc_class =
+               case_when(
+                   # y_2013 == 'Tree Canopy' & y_2018 == 'Tree Canopy' ~ 'persistence'
+                   # captures tree-over classes
+                   str_like(y_2013, 'Tree Canopy%') & str_like(y_2018, 'Tree Canopy%') ~ 'persistence'
+                 , y_2013 == 'Tree Canopy' & y_2018 != 'Tree Canopy' ~ 'loss'
+                 , y_2013 != 'Tree Canopy' & y_2018 == 'Tree Canopy' ~ 'gain'
+                 , TRUE ~ 'not tree'
+                 )
+    )
+    )
 
 # now calculate percent tree canopy in buffers
 buffer_pct_tc_2018 <- 
@@ -213,6 +237,9 @@ trees_sf_buffered |>
 # 4 Correlations
 ```{r}
 # Join datasets
+(heat_summary <- read_csv('output_tables/heat_summary_2024-02-27.csv') |> 
+    rename(area_id = polygon_id))
+
 ## Neighborhood correlations
 neigh_cor <- 
   left_join(holc_pct_imp_2018,holc_pct_tc_2018, by='area_id') |>
@@ -220,6 +247,9 @@ neigh_cor <-
 
 # correlation matrix
 cor(neigh_cor)
+
+(heat_summary_buffer <- read_csv('output_tables/heat_summary_buffer_2025-04-30.csv') |> 
+    rename(Burghardt_ID = polygon_id))
 
 ## Buffer correlations
 buffer_cor <- 
