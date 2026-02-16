@@ -29,6 +29,7 @@ packs <- c(
   , 'tictoc'          # times things
   , 'beepr'           # makes noises
   , 'foreign'         # read DBF files
+  , 'corrplot'        # correlation plots
   )         
 
 # check for all of the libraries
@@ -173,9 +174,6 @@ trees_sf_buffered <- trees_sf_buffered |>
 trees_sf_buffered |> 
   mapview(zcol = 'pct_tc_18_buffered')
 
-maggie_trees<-trees_sf_buffered |> 
-  st_join(trees_sf,by='Burghardt_ID')
-
 ```
 
 
@@ -232,13 +230,32 @@ trees_sf_buffered <- trees_sf_buffered |>
 trees_sf_buffered |> 
   mapview(zcol = 'pct_imp_18_buffered')
 
+trees_sf_buffered |> 
+  write_csv(paste0('output_tables/24_25_cleaned_buffers.csv'))
+
+
 ```
 
 # 4 Correlations
 ```{r}
-# Join datasets
+# Necessary datasets
 (heat_summary <- read_csv('output_tables/heat_summary_2024-02-27.csv') |> 
     rename(area_id = polygon_id))
+
+(heat_summary_buffer <- read_csv('output_tables/heat_summary_buffer_2025-11-04.csv') |> 
+    rename(Burghardt_ID = polygon_id))
+
+# make csv of all buffer data
+trees_sf_buffered <- trees_sf |> 
+  left_join(heat_summary_buffer, by = 'Burghardt_ID') |>
+  left_join(buffer_pct_imp_2018, by = 'Burghardt_ID') |>
+  left_join(weird_buffers, by = 'Burghardt_ID') |>
+  left_join(buffer_pct_tc_2018, by = 'Burghardt_ID')
+
+trees_sf_buffered |> 
+  write_csv(paste0('output_tables/24_25_cleaned_buffers.csv'))
+
+
 
 ## Neighborhood correlations
 neigh_cor <- 
@@ -246,10 +263,9 @@ neigh_cor <-
   left_join(heat_summary, by='area_id')
 
 # correlation matrix
-cor(neigh_cor)
-
-(heat_summary_buffer <- read_csv('output_tables/heat_summary_buffer_2025-04-30.csv') |> 
-    rename(Burghardt_ID = polygon_id))
+cor(buffer_cor)
+corrplot::corrplot(cor(neigh_cor), type = "upper", 
+         tl.col = "black", tl.srt = 45)
 
 ## Buffer correlations
 buffer_cor <- 
@@ -259,5 +275,7 @@ buffer_cor <-
 
 # correlation matrix
 cor(buffer_cor)
+corrplot::corrplot(cor(buffer_cor), type = "upper", 
+         tl.col = "black", tl.srt = 45)
 
 ```

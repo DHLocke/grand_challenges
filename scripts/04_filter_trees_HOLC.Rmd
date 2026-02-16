@@ -189,8 +189,26 @@ trees |>
 
 ```
 
+# 5 add in neighborhood tree cover data
+```{r}
 
-# 5 export 
+tc_summary <- 
+  read_csv('output_tables/holc_pct_tc_2018_2025-04-21.csv')
+
+trees <- 
+  trees |> 
+  left_join(tc_summary, by = 'area_id')
+
+# did that work?
+trees |> st_drop_geometry() |> tabyl(pct_tc_2018, grade_group)
+
+trees |> 
+  sample_n(1000) |> 
+  mapview(zcol = 'pct_tc_2018')
+
+```
+
+# 6 export 
 ```{r}
 
 # drop unneccessary variables

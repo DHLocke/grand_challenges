@@ -182,6 +182,18 @@ trees_sf |>
           , layer.name = 'Mean Temp (C)'
           )
 
+trees_sf |> 
+  mapview(zcol = "SPP"
+          , layer.name = 'Tree species'
+          , col.regions = "white"
+          , alpha.regions = 1
+          , legend = F
+          , cex = 2
+          )+
+  mapview(heat,
+          zcol = 'heat'
+          , layer.name = 'Temp (C)'
+          )
 
 ```
 
