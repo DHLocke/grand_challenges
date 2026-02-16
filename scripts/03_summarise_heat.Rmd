@@ -315,6 +315,7 @@ trees_sf |> mapview(zcol = 'SPP') + mapview(heat)
 # extract temperature from the raster to the points.
 trees_sf <-
   trees_sf |> 
+  # move this up to right under st_transform(crs = st_crs(heat))?
     mutate(temp_C = raster::extract(heat, trees_sf)) # if a lot of points, consider saving *.csv
 
 # double checks
@@ -393,7 +394,7 @@ all.equal(nrow(shp), shp$Burghardt_ID |> unique() |> length()) # yes!
 
 # 2x check
 shp |> st_drop_geometry() |> tabyl(group)
-
+shp |> tidylog::distinct(Burghardt_ID, group) # no rows removed, good
 
 
 # kth loop dispatches jobs
@@ -425,6 +426,14 @@ for(k in LETTERS[1:n_jobs]){
   }) # end job k-th job
   }  # end all less than 3 seconds with 3 jobs (cores)
 
+(test <- read_csv('output_tables/heat_15m_buffer_2026-02-16.csv', skip = 1))
+
+nrow(shp); nrow(test) # that's good, same length
+
+# do they join cleanly?
+test |> tidylog::left_join(shp, by = c('polygon_id' = 'Burghardt_ID')) # perfectly. Maybe change 'polygon_id" to 'Burghard_ID' in the data.frame write out step?
+
+test |> tidylog::anti_join(shp, by = c('polygon_id' = 'Burghardt_ID')) # perfect.
 
 # Okay let's try those weird trees that didn't run
 n_jobs <- 3
